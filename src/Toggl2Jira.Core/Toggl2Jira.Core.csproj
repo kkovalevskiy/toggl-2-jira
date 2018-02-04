@@ -2,7 +2,4 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="TogglAPI.Net" Version="0.2.0"/>
-  </ItemGroup>
 </Project>
