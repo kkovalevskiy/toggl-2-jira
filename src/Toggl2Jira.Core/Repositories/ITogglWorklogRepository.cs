@@ -8,5 +8,7 @@ namespace Toggl2Jira.Core.Repositories
     public interface ITogglWorklogRepository
     {
         Task<IEnumerable<TogglWorklog>> GetWorklogsAsync(DateTime? startDate = null, DateTime? endDate = null);
+
+        Task UpdateWorklogsAsync(IEnumerable<TogglWorklog> worklogsToUpdate);
     }
 }

@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Toggl2Jira.Core\Toggl2Jira.Core.csproj" />
+    <ProjectReference Include="..\Toggl2Jira.Core\Toggl2Jira.Core.csproj" />
   </ItemGroup>
 
 </Project>

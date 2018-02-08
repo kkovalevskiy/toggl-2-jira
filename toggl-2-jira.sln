@@ -6,7 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{30BB1A58-082
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toggl2Jira.Core", "src\Toggl2Jira.Core\Toggl2Jira.Core.csproj", "{7AC7949E-28B4-4060-AB9C-6348022634EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl2Jira.Console", "Toggl2Jira.Console\Toggl2Jira.Console.csproj", "{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl2Jira.Console", "src\Toggl2Jira.Console\Toggl2Jira.Console.csproj", "{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
