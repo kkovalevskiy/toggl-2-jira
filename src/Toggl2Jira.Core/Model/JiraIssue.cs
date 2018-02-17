@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Toggl2Jira.Core.Model
+﻿namespace Toggl2Jira.Core.Model
 {
     public class JiraIssue
     {
@@ -10,6 +6,9 @@ namespace Toggl2Jira.Core.Model
 
         public string Description { get; set; }
 
-        public override string ToString() => $"{Key}:{Description}";
+        public override string ToString()
+        {
+            return $"{Key}:{Description}";
+        }
     }
 }

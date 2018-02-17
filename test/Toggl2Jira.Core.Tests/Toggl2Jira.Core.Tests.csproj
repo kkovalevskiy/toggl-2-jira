@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0-preview-20180207-05" />
+    <PackageReference Include="NUnit" Version="3.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Toggl2Jira.Core\Toggl2Jira.Core.csproj">
+      <Project>{7AC7949E-28B4-4060-AB9C-6348022634EE}</Project>
+      <Name>Toggl2Jira.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

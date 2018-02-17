@@ -1,14 +1,35 @@
 ﻿using System;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Toggl2Jira.Core.Repositories
-{
+{    
     public static class ApiUtils
     {
-        public static string Base64Encode(string plainText)
+        public static void EnsureSuccessStatus(this HttpResponseMessage message)
         {
-            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(plainTextBytes);
+            var responseContent = message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var requestContent = message.RequestMessage.Content.ReadAsStringAsync();
+            if (message.IsSuccessStatusCode == false)
+            {
+                var errorInfo = new
+                {
+                    StatusCode = (int) message.StatusCode,
+                    message.ReasonPhrase,
+                    Url = message.RequestMessage.RequestUri.ToString(),
+                    Method = message.RequestMessage.Method.ToString(),
+                    ResponseContent = responseContent,
+                    RequestContent = requestContent
+                };
+
+                throw new HttpRequestException(
+                    $"Remote server has returned failed status.{Environment.NewLine}" +
+                    $"Request: {errorInfo.Method} {errorInfo.Url}{Environment.NewLine}" +
+                    $"Response Status: {errorInfo.StatusCode} - {errorInfo.ReasonPhrase}{Environment.NewLine}" +
+                    $"Request Content:{Environment.NewLine}{errorInfo.RequestContent}{Environment.NewLine}" +
+                    $"Response Content:{Environment.NewLine}{errorInfo.ResponseContent}");
+            }            
         }
     }
 }

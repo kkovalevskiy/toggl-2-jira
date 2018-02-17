@@ -1,28 +1,31 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 using Toggl2Jira.Core;
+using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
+using Toggl2Jira.Core.Synchronization;
 
 namespace Toggl2Jira.Console
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            /*
-            var config = new TogglConfiguration("df18aceeff3e4416206d5dc518e6bec8");
-            var repo = new TogglWorklogRepository(config);
-            var result = repo.GetWorklogsAsync(DateTime.Now.AddDays(-4)).GetAwaiter().GetResult();
-
-            result.First().tags = new[] { "myNewTag1" };
-
-            repo.UpdateWorklogsAsync(result).GetAwaiter().GetResult();*/
+            var configFile = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appconfig.json")
+                .Build();
             
+            var config = Configuration.FromConfigFile(configFile);
+            var services = new SynchronizationServices(config);
+            var tempoWorklogs = services.TogglWorklogRepository.GetWorklogsAsync(DateTime.Now.AddDays(-2)).GetAwaiter().GetResult();
             
-            var config = new JiraConfiguration() { UserName = "kkovalevskiy@oneinc.biz", Password = "myPassword" };
-            var repo = new JiraRepository(config);
-            var issues = repo.SearchJiraIssuesAsync(new JiraIssuesSearchParams() { Description = "Common:", Labels = new[] { "TSR"} }).GetAwaiter().GetResult();
-            var worklogs = repo.GetTempoWorklogsAsync(DateTime.Now.AddDays(-7)).GetAwaiter().GetResult();
+            var synchronizationManager = new WorklogManager(tempoWorklogs.First(), services);
+
+            var result = synchronizationManager.ValidateWorklog().GetAwaiter().GetResult();
+                        
             System.Console.WriteLine("Hello!");
         }
     }

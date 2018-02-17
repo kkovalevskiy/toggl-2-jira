@@ -1,15 +1,15 @@
 ﻿using EnsureThat;
 
-namespace Toggl2Jira.Core.Repositories
+namespace Toggl2Jira.Core
 {
     public class TogglConfiguration
     {
-        public string ApiToken { get; }
-
         public TogglConfiguration(string apiToken)
         {
             EnsureArg.IsNotNullOrWhiteSpace(apiToken, nameof(apiToken));
             ApiToken = apiToken;
         }
+
+        public string ApiToken { get; }
     }
 }

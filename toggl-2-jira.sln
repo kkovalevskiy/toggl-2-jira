@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 15.0.26124.0
@@ -7,6 +7,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Toggl2Jira.Core", "src\Toggl2Jira.Core\Toggl2Jira.Core.csproj", "{7AC7949E-28B4-4060-AB9C-6348022634EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl2Jira.Console", "src\Toggl2Jira.Console\Toggl2Jira.Console.csproj", "{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E1D022F5-7263-4CEA-888A-71807130DBBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl2Jira.Core.Tests", "test\Toggl2Jira.Core.Tests\Toggl2Jira.Core.Tests.csproj", "{7726D942-16AE-4E27-9D46-0A61BE765907}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +46,18 @@ Global
 		{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}.Release|x64.Build.0 = Release|Any CPU
 		{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}.Release|x86.ActiveCfg = Release|Any CPU
 		{DCB941FF-2C82-4F2F-83A2-C804E8FE1558}.Release|x86.Build.0 = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|x64.Build.0 = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Debug|x86.Build.0 = Debug|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|x64.ActiveCfg = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|x64.Build.0 = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|x86.ActiveCfg = Release|Any CPU
+		{7726D942-16AE-4E27-9D46-0A61BE765907}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +65,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7AC7949E-28B4-4060-AB9C-6348022634EE} = {30BB1A58-0822-4BC2-9BB0-E487B333C79A}
 		{DCB941FF-2C82-4F2F-83A2-C804E8FE1558} = {30BB1A58-0822-4BC2-9BB0-E487B333C79A}
+		{7726D942-16AE-4E27-9D46-0A61BE765907} = {E1D022F5-7263-4CEA-888A-71807130DBBE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {548A3CC1-4172-426D-A9F5-10B952D76FEF}

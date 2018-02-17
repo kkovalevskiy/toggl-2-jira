@@ -1,13 +1,13 @@
-﻿using EnsureThat;
-using System;
+﻿using System;
 using System.Net;
+using EnsureThat;
 
 namespace Toggl2Jira.Core.Repositories
 {
     public class QueryUri
     {
         private readonly string _baseUri;
-        private UriBuilder _uriBuilder;
+        private readonly UriBuilder _uriBuilder;
 
         public QueryUri(string baseUri)
         {
@@ -18,10 +18,7 @@ namespace Toggl2Jira.Core.Repositories
 
         public QueryUri AddDateTimeFilter(string filterName, DateTime? value, string format = "O")
         {
-            if (!value.HasValue)
-            {
-                return this;
-            }
+            if (!value.HasValue) return this;
 
             AddFilterSeparator();
             var stringValue = WebUtility.UrlEncode(value.Value.ToString(format));
@@ -31,10 +28,7 @@ namespace Toggl2Jira.Core.Repositories
 
         public QueryUri AddStringFilter(string filterName, string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return this;
-            }
+            if (string.IsNullOrWhiteSpace(value)) return this;
 
             AddFilterSeparator();
             var encodedValue = WebUtility.UrlEncode(value);
@@ -49,10 +43,7 @@ namespace Toggl2Jira.Core.Repositories
 
         private void AddFilterSeparator()
         {
-            if (string.IsNullOrEmpty(_uriBuilder.Query) == false)
-            {
-                _uriBuilder.Query += "&";
-            }
+            if (string.IsNullOrEmpty(_uriBuilder.Query) == false) _uriBuilder.Query += "&";
         }
     }
 }
