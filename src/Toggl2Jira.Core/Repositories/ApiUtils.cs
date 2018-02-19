@@ -8,11 +8,11 @@ namespace Toggl2Jira.Core.Repositories
     public static class ApiUtils
     {
         public static void EnsureSuccessStatus(this HttpResponseMessage message)
-        {
-            var responseContent = message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            var requestContent = message.RequestMessage.Content.ReadAsStringAsync();
+        {            
             if (message.IsSuccessStatusCode == false)
             {
+                var responseContent = message.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var requestContent = message.RequestMessage.Content?.ReadAsStringAsync()?.GetAwaiter().GetResult();
                 var errorInfo = new
                 {
                     StatusCode = (int) message.StatusCode,

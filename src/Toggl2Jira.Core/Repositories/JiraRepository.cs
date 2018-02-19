@@ -24,15 +24,22 @@ namespace Toggl2Jira.Core.Repositories
             _configuration = configuration;
         }
 
-        public Task<IEnumerable<JiraIssue>> SearchJiraIssuesAsync(JiraIssuesSearchParams searchParams)
+        public async Task<IEnumerable<JiraIssue>> SearchJiraIssuesAsync(JiraIssuesSearchParams searchParams)
         {
-            return GetJiraIssuesAsync(searchParams.ToJql());
+            var issues = await GetJiraIssuesAsync(searchParams.ToJql());
+            return issues;
         }
 
         public async Task<JiraIssue> GetJiraIssueByKeyAsync(string key)
         {
             var issues = await GetJiraIssuesAsync($"key = \"{key}\"");
             return issues.SingleOrDefault();
+        }
+
+        public async Task<JiraIssue[]> GetJiraIssuesByKeysAsync(string[] keys)
+        {
+            var issues = await GetJiraIssuesAsync($"key in ({string.Join(", ", keys.Select(k => $"\"{k}\""))})");
+            return issues;
         }
 
         public async Task<IEnumerable<TempoWorklog>> GetTempoWorklogsAsync(DateTime? from = null, DateTime? to = null)
@@ -91,7 +98,7 @@ namespace Toggl2Jira.Core.Repositories
             }
         }
 
-        private async Task<IEnumerable<JiraIssue>> GetJiraIssuesAsync(string jql)
+        private async Task<JiraIssue[]> GetJiraIssuesAsync(string jql)
         {
             var httpRequest = CreateRequestMessage(HttpMethod.Post, SearchUrl);
 
@@ -136,6 +143,8 @@ namespace Toggl2Jira.Core.Repositories
             public string jql { get; set; } = "";
 
             public int maxResults { get; set; } = 100;
+
+            public string validateQuery = "warn";
         }
     }
 }

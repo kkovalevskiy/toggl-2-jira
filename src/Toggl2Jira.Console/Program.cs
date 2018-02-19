@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Toggl2Jira.Core;
 using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
-using Toggl2Jira.Core.Synchronization;
+using Toggl2Jira.Core.Services;
 
 namespace Toggl2Jira.Console
 {
@@ -20,12 +20,12 @@ namespace Toggl2Jira.Console
             
             var config = Configuration.FromConfigFile(configFile);
             var services = new SynchronizationServices(config);
-            var tempoWorklogs = services.TogglWorklogRepository.GetWorklogsAsync(DateTime.Now.AddDays(-2)).GetAwaiter().GetResult();
+            var tempoWorklogs = services.TogglWorklogRepository.GetWorklogsAsync(DateTime.Now.AddDays(-5)).GetAwaiter().GetResult();
+            var worklogManagers = tempoWorklogs.Select(w => new WorklogManager(w, services)).ToArray();
             
-            var synchronizationManager = new WorklogManager(tempoWorklogs.First(), services);
+            var validationService = new WorklogValidationService(services.JiraIssuesRepository);
+            var validationResults = validationService.ValidateWorklogs(worklogManagers.Select(w => w.Worklog).ToArray()).GetAwaiter().GetResult();
 
-            var result = synchronizationManager.ValidateWorklog().GetAwaiter().GetResult();
-                        
             System.Console.WriteLine("Hello!");
         }
     }

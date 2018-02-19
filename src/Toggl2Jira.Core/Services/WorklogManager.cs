@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using EnsureThat;
 using Toggl2Jira.Core.Model;
 
-namespace Toggl2Jira.Core.Synchronization
+namespace Toggl2Jira.Core.Services
 {
     public class WorklogManager
     {
@@ -65,54 +64,6 @@ namespace Toggl2Jira.Core.Synchronization
         {
             _services.WorklogConverter.UpdateTogglWorklog(_togglWorklog, _worklog);
             await _services.TogglWorklogRepository.UpdateWorklogsAsync(new[] {_togglWorklog});
-        }
-
-        public async Task<WorklogValidationResults> ValidateWorklog()
-        {
-            var result = new WorklogValidationResults();
-            if (string.IsNullOrWhiteSpace(Worklog.IssueKey) == false)
-            {
-                var issue = await _services.JiraIssuesRepository.GetJiraIssueByKeyAsync(Worklog.IssueKey);
-                if (issue != null)
-                {
-                    Worklog.IssueSummary = issue.Description;
-                }
-                else
-                {
-                    result.Add(nameof(Worklog.IssueSummary), "Issue with such key doesn't exist in JIRA");
-                }
-            }
-            else
-            {
-                result.Add(nameof(Worklog.IssueKey), "Issue Key is empty");
-            }
-
-            if (string.IsNullOrWhiteSpace(Worklog.Activity))
-            {
-                result.Add(nameof(Worklog.Activity), "Activity can not be empty");
-            }
-
-            if (Worklog.Duration.TotalSeconds < 1.0)
-            {
-                result.Add(nameof(Worklog.Duration), "Duration is less than a second and can not be saved to Tempo");
-            }
-
-            if (Worklog.Duration.TotalHours > 10.0)
-            {
-                result.Add(nameof(Worklog.Duration), "Duration is greater than 10 hours and looks suspicious");
-            }
-
-            if (Worklog.StartDate < new DateTime(2013, 1, 1))
-            {
-                result.Add(nameof(Worklog.StartDate), "StartDate is out of range");
-            }
-
-            if (Worklog.StartDate > DateTime.Now)
-            {
-                result.Add(nameof(Worklog.StartDate), "StartDate is in future");
-            }
-
-            return result;
         }
         
         private async Task RollbackSynchronizationAsync()

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toggl2Jira.Core.Synchronization
+namespace Toggl2Jira.Core.Services
 {
     public class SynchronizationResult
     {
