@@ -1,16 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace Toggl2Jira.Core.Model
+namespace Toggl2Jira.Core
 {
-    public class WorklogConverterConfguration
+    public class WorklogDataConfguration
     {
-        public string TempoWorklogCommentFormatString = @"{IssueKey} {Activity}. {Comment}";
+        public string TogglWorklogCommentFormatString = @"{IssueKey} {Activity}. {Comment}";
 
-        public string IssueKeyRegex { get; set; } = @"(\S+)\s.*";
-
-        public string CommentRegex { get; set; } = @"\S+\s(.*)";
-
-        public string ActivityRegex { get; set; } = null;
+        public string WorklogRegex = @"(?<IssueKey>[A-Z]+\-[0-9]+)?(?<IssueKeyAlias>[A-Z]{3})?\s*(?<Comment>.*)";
 
         public Dictionary<string, string> IssueKeyAliases { get; set; } = new Dictionary<string, string>
         {

@@ -8,7 +8,7 @@
 
         public override string ToString()
         {
-            return $"{Key}:{Description}";
+            return $"{Key} {Description}";
         }
     }
 }

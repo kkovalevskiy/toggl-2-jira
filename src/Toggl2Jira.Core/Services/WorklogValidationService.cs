@@ -10,11 +10,15 @@ namespace Toggl2Jira.Core.Services
 {
     public class WorklogValidationService : IWorklogValidationService
     {
+        private readonly WorklogDataConfguration _worklogDataConfguration;
         private readonly IJiraIssuesRepository _issuesRepository;
 
-        public WorklogValidationService(IJiraIssuesRepository issuesRepository)
+        public WorklogValidationService(WorklogDataConfguration worklogDataConfguration, IJiraIssuesRepository issuesRepository)
         {
-            EnsureArg.IsNotNull(issuesRepository, nameof(issuesRepository));
+            EnsureArg.IsNotNull(issuesRepository);
+            EnsureArg.IsNotNull(worklogDataConfguration);
+            
+            _worklogDataConfguration = worklogDataConfguration;
             _issuesRepository = issuesRepository;
         }
 
@@ -28,13 +32,13 @@ namespace Toggl2Jira.Core.Services
         {
             var result = new WorklogValidationResults(worklog);
             
-            worklog.IssueSummary = null;
+            result.IssueSummary = null;
             if (string.IsNullOrWhiteSpace(worklog.IssueKey) == false)
             {
                 var issue = issues.FirstOrDefault(i => i.Key == worklog.IssueKey);                
                 if (issue != null)
                 {
-                    worklog.IssueSummary = issue.Description;
+                    result.IssueSummary = issue.Description;
                 }
                 else
                 {
@@ -46,9 +50,19 @@ namespace Toggl2Jira.Core.Services
                 result.Add(nameof(worklog.IssueKey), "Issue Key is empty");
             }
 
+            if (string.IsNullOrWhiteSpace(worklog.Comment))
+            {
+                result.Add(nameof(worklog.Comment), "Comment can not be empty");
+            }
+
             if (string.IsNullOrWhiteSpace(worklog.Activity))
             {
                 result.Add(nameof(worklog.Activity), "Activity can not be empty");
+            }
+
+            if (_worklogDataConfguration.Activities.Contains(worklog.Activity) == false)
+            {
+                result.Add(nameof(worklog.Activity), $"Unknown activity \"{worklog.Activity}\". Allowed values are: {string.Join(", ", _worklogDataConfguration.Activities)}");
             }
 
             if (worklog.Duration.TotalSeconds < 1.0)

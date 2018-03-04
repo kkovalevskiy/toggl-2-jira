@@ -6,7 +6,7 @@ namespace Toggl2Jira.Core
 {
     public class Configuration
     {
-        public static Configuration FromConfigFile(IConfiguration configFile)
+        public static Configuration FromEnvironmentConfig(IConfiguration configFile)
         {
             var userName = configFile["jira:userName"];
             var password = configFile["jira:password"];
@@ -30,6 +30,6 @@ namespace Toggl2Jira.Core
         
         // Use default configuration
         // TDB read it from json
-        public WorklogConverterConfguration WorklogConverterConfguration { get; } = new WorklogConverterConfguration();
+        public WorklogDataConfguration WorklogDataConfguration { get; } = new WorklogDataConfguration();
     }
 }

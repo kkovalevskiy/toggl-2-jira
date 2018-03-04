@@ -7,22 +7,21 @@ namespace Toggl2Jira.Core.Repositories
     public class QueryUri
     {
         private readonly string _baseUri;
-        private readonly UriBuilder _uriBuilder;
+        private string _query = "";
 
         public QueryUri(string baseUri)
         {
             EnsureArg.IsNotNullOrWhiteSpace(baseUri, nameof(baseUri));
             _baseUri = baseUri;
-            _uriBuilder = new UriBuilder(_baseUri);
         }
 
-        public QueryUri AddDateTimeFilter(string filterName, DateTime? value, string format = "O")
+        public QueryUri AddDateTimeFilter(string filterName, DateTime? value, string format = "yyyy-MM-ddTHH:mm:sszzz")
         {
             if (!value.HasValue) return this;
 
             AddFilterSeparator();
             var stringValue = WebUtility.UrlEncode(value.Value.ToString(format));
-            _uriBuilder.Query += $"{filterName}={stringValue}";
+            _query += $"{filterName}={stringValue}";
             return this;
         }
 
@@ -32,18 +31,19 @@ namespace Toggl2Jira.Core.Repositories
 
             AddFilterSeparator();
             var encodedValue = WebUtility.UrlEncode(value);
-            _uriBuilder.Query += $"{filterName}={encodedValue}";
+            _query += $"{filterName}={encodedValue}";
             return this;
         }
 
         public override string ToString()
         {
-            return _uriBuilder.ToString();
+            var uriBuilder = new UriBuilder(_baseUri) {Query = _query};
+            return uriBuilder.ToString();
         }
 
         private void AddFilterSeparator()
         {
-            if (string.IsNullOrEmpty(_uriBuilder.Query) == false) _uriBuilder.Query += "&";
+            if (string.IsNullOrEmpty(_query) == false) _query += "&";
         }
     }
 }

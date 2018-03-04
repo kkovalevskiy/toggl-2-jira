@@ -30,6 +30,12 @@ namespace Toggl2Jira.Core.Repositories
             return issues;
         }
 
+        public async Task<IEnumerable<JiraIssue>> SearchJiraIssuesAsync(string jql)
+        {
+            var issues = await GetJiraIssuesAsync(jql);
+            return issues;
+        }
+
         public async Task<JiraIssue> GetJiraIssueByKeyAsync(string key)
         {
             var issues = await GetJiraIssuesAsync($"key = \"{key}\"");

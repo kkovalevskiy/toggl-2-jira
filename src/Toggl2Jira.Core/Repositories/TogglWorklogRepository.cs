@@ -65,7 +65,7 @@ namespace Toggl2Jira.Core.Repositories
         {
             return new JsonSerializerSettings
             {
-                DateTimeZoneHandling = DateTimeZoneHandling.Local,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
                 DateParseHandling = DateParseHandling.DateTime
             };

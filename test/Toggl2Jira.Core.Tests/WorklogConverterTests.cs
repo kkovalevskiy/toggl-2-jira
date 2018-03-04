@@ -10,7 +10,7 @@ namespace Toggl2Jira.Core.Tests
         [SetUp]
         public void Setup()
         {
-            _converter = new WorklogConverter(new WorklogConverterConfguration());
+            _converter = new WorklogConverter(new WorklogDataConfguration());
         }
 
         private WorklogConverter _converter;
@@ -62,6 +62,17 @@ namespace Toggl2Jira.Core.Tests
             Assert.AreEqual("Design/Analysis", result.Activity);
             Assert.AreEqual("MAG-123", result.IssueKey);
             Assert.AreEqual("analysis. new features", result.Comment);
+        }
+
+        [Test]
+        public void NoIssueKey_ShouldBeParsedAsComment()
+        {
+            var togglWorklog = CreateWorklog("p1 4.0 analysis. new features");
+
+            var result = _converter.FromTogglWorklog(togglWorklog);
+            
+            Assert.IsNull(result.IssueKey);
+            Assert.AreEqual("p1 4.0 analysis. new features", result.Comment);
         }
 
         [Test]

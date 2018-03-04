@@ -18,13 +18,8 @@ namespace Toggl2Jira.Console
                 .AddJsonFile("appconfig.json")
                 .Build();
             
-            var config = Configuration.FromConfigFile(configFile);
-            var services = new SynchronizationServices(config);
-            var tempoWorklogs = services.TogglWorklogRepository.GetWorklogsAsync(DateTime.Now.AddDays(-5)).GetAwaiter().GetResult();
-            var worklogManagers = tempoWorklogs.Select(w => new WorklogManager(w, services)).ToArray();
-            
-            var validationService = new WorklogValidationService(services.JiraIssuesRepository);
-            var validationResults = validationService.ValidateWorklogs(worklogManagers.Select(w => w.Worklog).ToArray()).GetAwaiter().GetResult();
+            var config = Configuration.FromEnvironmentConfig(configFile);
+                        
 
             System.Console.WriteLine("Hello!");
         }

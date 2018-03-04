@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EnsureThat;
 
 namespace Toggl2Jira.Core.Model
 {
@@ -9,6 +10,7 @@ namespace Toggl2Jira.Core.Model
 
         public WorklogValidationResults(Worklog validatedWorklog)
         {
+            EnsureArg.IsNotNull(validatedWorklog);
             _validatedWorklog = validatedWorklog;
         }
 
@@ -16,7 +18,11 @@ namespace Toggl2Jira.Core.Model
         {
             Add(new WorklogValidationResult(propertyName, message));
         }
+        
+        public string IssueSummary { get; set; }
 
         public bool IsValid => Count == 0;
+
+        public Worklog ValidatedWorklog => _validatedWorklog;        
     }
 }

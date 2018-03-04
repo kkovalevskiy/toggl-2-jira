@@ -8,9 +8,9 @@ namespace Toggl2Jira.Core.Model
 {
     public class WorklogConverter: IWorklogConverter
     {
-        private readonly WorklogConverterConfguration _configuration;
+        private readonly WorklogDataConfguration _configuration;
 
-        public WorklogConverter(WorklogConverterConfguration configuration)
+        public WorklogConverter(WorklogDataConfguration configuration)
         {
             EnsureArg.IsNotNull(configuration, nameof(configuration));
             _configuration = configuration;
@@ -18,10 +18,18 @@ namespace Toggl2Jira.Core.Model
 
         public Worklog FromTogglWorklog(TogglWorklog originalWorklog)
         {
-            var issueKey = ExtractDataByRegex(originalWorklog.description, _configuration.IssueKeyRegex);
-            if (TryExtractMappedValue(issueKey, _configuration.IssueKeyAliases, out var mappedIssueKey)) issueKey = mappedIssueKey;
-
-            var comment = ExtractDataByRegex(originalWorklog.description, _configuration.CommentRegex);
+            var issueKey = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex, "IssueKey");
+            if (string.IsNullOrWhiteSpace(issueKey))
+            {
+                var issueKeyAlias = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex,
+                    "IssueKeyAlias");
+                if (TryExtractMappedValue(issueKeyAlias, _configuration.IssueKeyAliases, out var mappedIssueKey))
+                {
+                    issueKey = mappedIssueKey;
+                }
+            }
+                                                           
+            var comment = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex, "Comment");            
             var activity = ParseActivity(issueKey, comment, originalWorklog);
             if (!_configuration.Activities.Contains(activity)) activity = _configuration.DefaultActivity;
 
@@ -37,7 +45,7 @@ namespace Toggl2Jira.Core.Model
 
         public void UpdateTogglWorklog(TogglWorklog target, Worklog source)
         {
-            var targetFormatString = _configuration.TempoWorklogCommentFormatString
+            var targetFormatString = _configuration.TogglWorklogCommentFormatString
                 .Replace("{IssueKey}", "{0}")
                 .Replace("{Activity}", "{1}")
                 .Replace("{Comment}", "{2}");
@@ -74,7 +82,7 @@ namespace Toggl2Jira.Core.Model
 
         private string ExtractActivity(string parsedIssueKey, string parsedComment, TogglWorklog originalWorklog)
         {
-            var activity = ExtractDataByRegex(originalWorklog.description, _configuration.ActivityRegex);
+            var activity = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex, "Activity");
             if (string.IsNullOrWhiteSpace(activity) == false) return activity;
 
             if (TryExtractMappedValue(parsedIssueKey, _configuration.IssueKeyToDefaultActivityMap, out activity)) return activity;
@@ -93,14 +101,20 @@ namespace Toggl2Jira.Core.Model
             return false;
         }
 
-        private string ExtractDataByRegex(string targetString, string regex)
+        private string ExtractDataByRegex(string targetString, string regex, string groupName)
         {
             if (string.IsNullOrWhiteSpace(regex)) return null;
 
             var match = Regex.Match(targetString, regex);
             if (match.Success == false) return null;
 
-            return match.Groups[1].Value;
+            var value = match.Groups[groupName].Value;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            return value.Trim();
         }
     }
 }
