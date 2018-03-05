@@ -5,7 +5,7 @@ using Toggl2Jira.Core.Model;
 namespace Toggl2Jira.Core.Tests
 {
     [TestFixture]
-    public class WorklogConverterTests
+    public class WorklogParserTests
     {
         [SetUp]
         public void Setup()

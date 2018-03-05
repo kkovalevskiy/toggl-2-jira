@@ -8,6 +8,6 @@
         xmlns:mvvm="http://prismlibrary.com/"
         xmlns:utils="clr-namespace:Toggl2Jira.UI.Utils"
         mc:Ignorable="d"
-        Title="Toggl 2 Jira" Height="350" Width="600">
+        Title="Toggl 2 Jira" Height="600" Width="1200" WindowStartupLocation="CenterScreen">
     <views:WorklogList mvvm:ViewModelLocator.AutoWireViewModel="True" />
 </Window>

@@ -22,13 +22,14 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
+    
     <Style TargetType="DatePicker" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="TextBox" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="TextBlock" BasedOn="{StaticResource CommonValidationStyle}" />
+    <Style TargetType="CheckBox" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="DataGridCell" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="ComboBox" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="xctk:DateTimePicker" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="xctk:TimeSpanUpDown" BasedOn="{StaticResource CommonValidationStyle}" />
-    <Style TargetType="views:Autocomplete" BasedOn="{StaticResource CommonValidationStyle}" />
+    <Style TargetType="views:Autocomplete" BasedOn="{StaticResource CommonValidationStyle}" />        
 </ResourceDictionary>

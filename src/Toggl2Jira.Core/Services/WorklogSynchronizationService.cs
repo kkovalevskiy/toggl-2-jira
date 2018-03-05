@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using EnsureThat;
+using Newtonsoft.Json;
 using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
 
@@ -8,6 +9,15 @@ namespace Toggl2Jira.Core.Services
 {
     public class WorklogSynchronizationService: IWorklogSynchronizationService
     {
+        private static T Clone<T>(T originalValue) where T : new()
+        {
+            if (originalValue == null)
+            {
+                return new T();
+            }
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(originalValue));
+        }
+        
         private readonly IWorklogConverter _worklogConverter;
         private readonly ITempoWorklogRepository _tempoWorklogRepository;
         private readonly ITogglWorklogRepository _togglWorklogRepository;
@@ -77,18 +87,16 @@ namespace Toggl2Jira.Core.Services
 
         private TogglWorklog CreateTogglWorklogToSend(Worklog worklog)
         {
-            var togglWorklogToSend = new TogglWorklog();
+            var togglWorklogToSend = Clone(worklog.TogglWorklog);
             _worklogConverter.UpdateTogglWorklog(togglWorklogToSend, worklog);
             togglWorklogToSend.IsSynchronized = true;
-            togglWorklogToSend.id = worklog.TogglWorklog?.id;
             return togglWorklogToSend;
         }
 
         private TempoWorklog CreateTempoWorklogToSend(Worklog worklog)
         {
-            var tempoWorklogToSend = new TempoWorklog();
+            var tempoWorklogToSend = Clone(worklog.TempoWorklog);
             _worklogConverter.UpdateTempoWorklog(tempoWorklogToSend, worklog);
-            tempoWorklogToSend.id = worklog.TempoWorklog?.id;
             return tempoWorklogToSend;
         }
 

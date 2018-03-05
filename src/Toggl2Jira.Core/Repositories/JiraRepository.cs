@@ -72,7 +72,7 @@ namespace Toggl2Jira.Core.Repositories
             {
                 foreach (var worklog in worklogs)
                 {
-                    worklog.author = new author {name = GetUserName()};
+                    worklog.author = new author {name = GetUserName()};                    
                     var request = CreateRequestMessage(HttpMethod.Post, WorklogUrl);
                     var content = JsonConvert.SerializeObject(worklog, new JsonSerializerSettings
                     {

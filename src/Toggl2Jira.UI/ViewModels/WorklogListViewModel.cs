@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using EnsureThat;
 using Prism.Commands;
 using Toggl2Jira.Core;
@@ -17,6 +19,7 @@ namespace Toggl2Jira.UI.ViewModels
         private readonly ITogglWorklogRepository _togglWorklogRepository;
         private readonly IWorklogConverter _worklogConverter;
         private readonly IWorklogValidationService _worklogValidationService;
+        private readonly IWorklogSynchronizationService _worklogSynchronizationService;
         private readonly IssueAutocompleteDataSource _issueAutocompleteDataSource;
 
         private DateTime _fromDate;
@@ -27,16 +30,20 @@ namespace Toggl2Jira.UI.ViewModels
             IWorklogConverter worklogConverter,
             IWorklogValidationService worklogValidationService,
             IJiraIssuesRepository jiraIssuesRepository,
+            IWorklogSynchronizationService worklogSynchronizationService,
             WorklogDataConfguration worklogDataConfguration)
         {
             EnsureArg.IsNotNull(togglWorklogRepository);
             EnsureArg.IsNotNull(worklogConverter);
             EnsureArg.IsNotNull(worklogValidationService);
+            EnsureArg.IsNotNull(jiraIssuesRepository);
+            EnsureArg.IsNotNull(worklogSynchronizationService);
             EnsureArg.IsNotNull(worklogDataConfguration);
 
             _togglWorklogRepository = togglWorklogRepository;
             _worklogConverter = worklogConverter;
             _worklogValidationService = worklogValidationService;
+            _worklogSynchronizationService = worklogSynchronizationService;
             _activityList = new ObservableCollection<string>(worklogDataConfguration.Activities);
             _issueAutocompleteDataSource = new IssueAutocompleteDataSource(jiraIssuesRepository);
 
@@ -47,11 +54,17 @@ namespace Toggl2Jira.UI.ViewModels
             {
                 LoadWorklogsCommand.RaiseCanExecuteChanged();
                 ValidateWorklogsCommand.RaiseCanExecuteChanged();
+                SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
             };
-            Worklogs.CollectionChanged += (sender, args) => ValidateWorklogsCommand.RaiseCanExecuteChanged();
+            Worklogs.CollectionChanged += (sender, args) =>
+            {
+                ValidateWorklogsCommand.RaiseCanExecuteChanged();
+                SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
+            };
 
             LoadWorklogsCommand = new DelegateCommand(InvokeLoadWorklogs, () => CanLoadWorklogs);
             ValidateWorklogsCommand = new DelegateCommand(InvokeValidateWorklogs, () => CanValidateWorklogs);
+            SynchronizeWorklogsCommand = new DelegateCommand(InvokeSynchronizeWorklogs, () => CanSynchronizeWorklogs);
         }
 
         public DateTime FromDate
@@ -70,19 +83,23 @@ namespace Toggl2Jira.UI.ViewModels
 
         private bool CanValidateWorklogs => BusyCounter.IsBusy == false && Worklogs.Count != 0;
 
+        private bool CanSynchronizeWorklogs => BusyCounter.IsBusy == false && Worklogs.Count != 0 &&
+                                               Worklogs.All(w => w.HasErrors == false);
+
         public DelegateCommand LoadWorklogsCommand { get; }
 
         public DelegateCommand ValidateWorklogsCommand { get; }
+        
+        public DelegateCommand SynchronizeWorklogsCommand { get; }
 
         public ObservableCollection<WorklogViewModel> Worklogs { get; } = new ObservableCollection<WorklogViewModel>();
 
         public BusyCounter BusyCounter { get; } = new BusyCounter();
 
-        public ObservableCollection<string> ActivityList => _activityList;
-        
         protected override void OnErrorsChanged(string propertyName)
         {
             LoadWorklogsCommand.RaiseCanExecuteChanged();
+            SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
             base.OnErrorsChanged(propertyName);
         }
 
@@ -105,11 +122,12 @@ namespace Toggl2Jira.UI.ViewModels
                 var toDateToLoad = ToDate.Date + new TimeSpan(23, 59, 59);
                 var tempoWorklogs = await _togglWorklogRepository.GetWorklogsAsync(fromDateToLoad, toDateToLoad);
                 var worklogs = tempoWorklogs.Select(tw => _worklogConverter.FromTogglWorklog(tw));
-                var worklogsViewModels = worklogs.Select(w => new WorklogViewModel(w)
+                var worklogsViewModels = worklogs.Select(CreateWorklogViewModel);
+                
+                foreach (var worklogViewModel in Worklogs)
                 {
-                    ActivityList = _activityList,
-                    IssueAutocompleteDataSource = _issueAutocompleteDataSource
-                });
+                    worklogViewModel.ErrorsChanged -= OnChildViewModelErrorsChanged;
+                }
                 Worklogs.Clear();
                 Worklogs.AddRange(worklogsViewModels);
             }
@@ -129,6 +147,47 @@ namespace Toggl2Jira.UI.ViewModels
                 {
                     var vm = Worklogs.Single(w => w.Worklog == worklogValidationResult.ValidatedWorklog);
                     vm.UpdateStatusFromValidationResults(worklogValidationResult);
+                }
+            }
+        }
+
+        private WorklogViewModel CreateWorklogViewModel(Worklog w)
+        {
+            var vm = new WorklogViewModel(w)
+            {
+                ActivityList = _activityList,
+                IssueAutocompleteDataSource = _issueAutocompleteDataSource                
+            };            
+            vm.ErrorsChanged += OnChildViewModelErrorsChanged;
+            return vm;
+        }
+
+        private void OnChildViewModelErrorsChanged(object sender, DataErrorsChangedEventArgs args)
+        {
+            SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
+        }
+
+        private async void InvokeSynchronizeWorklogs()
+        {
+            if (!CanSynchronizeWorklogs) return;
+
+            using (BusyCounter.StartBusyScope("Synchronizing worklogs"))
+            {
+                var worklogNumber = 1;
+                var worklogsToSynchronize = Worklogs.Where(w => w.IsSynchronized == false).ToList();
+                foreach (var worklogViewModel in worklogsToSynchronize)
+                {
+                    using (BusyCounter.StartBusyScope($"Synchronize worklog {worklogNumber}/{worklogsToSynchronize.Count}"))
+                    {
+                        var result = await _worklogSynchronizationService.SynchronizeAsync(worklogViewModel.Worklog);                        
+                        worklogViewModel.UpdateStatusFromSynchronizationResults(result);
+                        if (result.Success == false)
+                        {
+                            MessageBox.Show("Can't synchronize worklog. Please check out validaiton results");
+                            return;
+                        }
+                        worklogNumber++;
+                    }      
                 }
             }
         }

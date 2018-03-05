@@ -119,7 +119,7 @@
                 </VisualStateGroup>
             </VisualStateManager.VisualStateGroups>
 
-            <TextBox x:Name="PART_TextBox" />
+            <TextBox x:Name="PART_TextBox" FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}" />
             <Control x:Name="PART_Spinner"
                      Style="{StaticResource SpinnerStyle}"
                      VerticalAlignment="Center"

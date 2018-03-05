@@ -103,11 +103,6 @@ namespace Toggl2Jira.UI.Views
             AttachListenersToControl();            
         }
 
-        protected override void OnGotFocus(RoutedEventArgs e)
-        {
-            _textBox.Focus();
-        }
-
         private void AttachListenersToControl()
         {
             if (_textBox == null)
@@ -207,9 +202,6 @@ namespace Toggl2Jira.UI.Views
             get => (IAutocompleteDataSource) GetValue(AutocompleteDataSourceProperty);
             set => SetValue(AutocompleteDataSourceProperty, value);
         }
-
-//        public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
-//            "Text", typeof(string), typeof(Autocomplete), new PropertyMetadata(default(string)));
 
         public string Text
         {

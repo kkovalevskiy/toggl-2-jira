@@ -30,8 +30,15 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <Button Command="{Binding LoadWorklogsCommand}" Content="Load" Margin="5" />
-                    <Button Command="{Binding ValidateWorklogsCommand}" Content="Validate" Margin="5"/>
+                    <StackPanel.Resources>
+                        <Style TargetType="Button">
+                            <Setter Property="MinWidth" Value="50"></Setter>
+                            <Setter Property="Margin" Value="5"></Setter>
+                        </Style>
+                    </StackPanel.Resources>
+                    <Button Command="{Binding LoadWorklogsCommand}" Content="Load" />
+                    <Button Command="{Binding ValidateWorklogsCommand}" Content="Validate"/>
+                    <Button Command="{Binding SynchronizeWorklogsCommand}" Content="Synchronize" />
                 </StackPanel>
             </StackPanel>
 
@@ -54,7 +61,8 @@
                             <DataTemplate DataType="vm:WorklogViewModel">
                                 <local:Autocomplete 
                                     Text="{Binding IssueKey}" 
-                                    AutocompleteDataSource="{Binding IssueAutocompleteDataSource}">                                    
+                                    AutocompleteDataSource="{Binding IssueAutocompleteDataSource}"
+                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
                                 </local:Autocomplete>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
@@ -77,18 +85,29 @@
                                 <ComboBox 
                                     ItemsSource="{Binding ActivityList}" 
                                     SelectedItem="{Binding Activity}" 
-                                    Style="{StaticResource {x:Type ComboBox}}">                                    
+                                    Style="{StaticResource {x:Type ComboBox}}"
+                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
                                 </ComboBox>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
                     
-                    <DataGridTextColumn 
-                        Header="Comment" 
-                        Binding="{Binding Comment}"                        
-                        ElementStyle="{StaticResource {x:Type TextBlock}}"
-                        EditingElementStyle="{StaticResource {x:Type TextBox}}">                        
-                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Header="Comment" SortMemberPath="Comment">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate DataType="vm:WorklogViewModel">
+                                <TextBlock Text="{Binding Comment}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate DataType="vm:WorklogViewModel">
+                                <TextBox
+                                    Text="{Binding Comment}"
+                                    Style="{StaticResource {x:Type TextBox}}"
+                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
+                                </TextBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
                     
                     <DataGridTemplateColumn Header="Start Date" SortMemberPath="StartDate">
                         <DataGridTemplateColumn.CellTemplate>
@@ -99,7 +118,11 @@
                         
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate DataType="vm:WorklogViewModel">
-                                <xctk:DateTimePicker Value="{Binding StartDate}" Style="{StaticResource {x:Type xctk:DateTimePicker}}"></xctk:DateTimePicker>
+                                <xctk:DateTimePicker 
+                                    Value="{Binding StartDate}" 
+                                    Style="{StaticResource {x:Type xctk:DateTimePicker}}"
+                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                </xctk:DateTimePicker>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>                        
                     </DataGridTemplateColumn>
@@ -113,10 +136,20 @@
                         
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate DataType="vm:WorklogViewModel">
-                                <xctk:TimeSpanUpDown Value="{Binding Duration}" Style="{StaticResource {x:Type xctk:TimeSpanUpDown}}"></xctk:TimeSpanUpDown>
+                                <xctk:TimeSpanUpDown 
+                                    Value="{Binding Duration}" 
+                                    Style="{StaticResource {x:Type xctk:TimeSpanUpDown}}"
+                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                </xctk:TimeSpanUpDown>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>                        
                     </DataGridTemplateColumn>
+                    
+                    <DataGridCheckBoxColumn Binding="{Binding IsSynchronized}" Header="Is Sync">
+                    </DataGridCheckBoxColumn>
+                    
+                    <DataGridTextColumn Binding="{Binding SynchronizationStatus}" IsReadOnly="True" Header="Sync Status">                        
+                    </DataGridTextColumn>                                        
                 </DataGrid.Columns>
             </DataGrid>
 

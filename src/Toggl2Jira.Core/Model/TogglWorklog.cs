@@ -9,8 +9,8 @@ namespace Toggl2Jira.Core.Model
     {
         private const string IsSynchronizedTag = "synchronized";
         
-        public DateTime at;
-        public bool billable;
+        public DateTime? at;
+        public bool? billable;
         public string description;
         public double duration;
         public bool duronly;

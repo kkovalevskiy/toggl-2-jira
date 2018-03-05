@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using EnsureThat;
 
@@ -39,7 +40,8 @@ namespace Toggl2Jira.Core.Model
                 Comment = comment,
                 Duration = originalWorklog.stop.Subtract(originalWorklog.start),
                 IssueKey = issueKey,
-                StartDate = originalWorklog.start
+                StartDate = originalWorklog.start,
+                TogglWorklog = originalWorklog
             };
         }
 
@@ -48,8 +50,36 @@ namespace Toggl2Jira.Core.Model
             var targetFormatString = _configuration.TogglWorklogCommentFormatString
                 .Replace("{IssueKey}", "{0}")
                 .Replace("{Activity}", "{1}")
-                .Replace("{Comment}", "{2}");
-            target.description = string.Format(targetFormatString, source.IssueKey, source.Activity, source.Comment);
+                .Replace("{ActivitySeparator}", "{2}")
+                .Replace("{Comment}", "{3}");
+
+            var issueKeyAlias = _configuration.IssueKeyAliases
+                .Where(kv => kv.Value == source.IssueKey)
+                .Select(kv => kv.Key).FirstOrDefault();
+            var issueKey = issueKeyAlias ?? source.IssueKey;
+            
+            
+            var activityAlias = _configuration.ActivityAliases.Where(kv => kv.Value == source.Activity).Select(kv => kv.Key).FirstOrDefault();
+            var activity = activityAlias ?? source.Activity;
+            if (activity == _configuration.DefaultActivity)
+            {
+                activity = "";                
+            }
+            activity = activity.ToLower();
+            
+            var comment = source.Comment;
+            if (comment.StartsWith(activity) && string.IsNullOrWhiteSpace(activity) == false)
+            {
+                activity = "";                
+            }
+            
+            var activitySeparator = _configuration.ActivitySeparator;
+            if (string.IsNullOrWhiteSpace(comment) || string.IsNullOrWhiteSpace(activity))
+            {
+                activitySeparator = "";
+            }
+
+            target.description = string.Format(targetFormatString, issueKey, activity, activitySeparator, comment);
             target.start = source.StartDate;
             target.stop = source.StartDate.Add(source.Duration);
             target.duration = (int) source.Duration.TotalSeconds;
@@ -65,7 +95,7 @@ namespace Toggl2Jira.Core.Model
             {
                 new worklogAttribute
                 {
-                    value = source.Activity,
+                    value = source.Activity.Replace(" ", "%20").Replace("/", "%2F"),
                     key = "_Activity_"
                 }
             };

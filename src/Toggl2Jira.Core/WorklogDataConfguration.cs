@@ -4,7 +4,8 @@ namespace Toggl2Jira.Core
 {
     public class WorklogDataConfguration
     {
-        public string TogglWorklogCommentFormatString = @"{IssueKey} {Activity}. {Comment}";
+        public string TogglWorklogCommentFormatString = @"{IssueKey} {Activity}{ActivitySeparator}{Comment}";
+        public string ActivitySeparator = ". ";
 
         public string WorklogRegex = @"(?<IssueKey>[A-Z]+\-[0-9]+)?(?<IssueKeyAlias>[A-Z]{3})?\s*(?<Comment>.*)";
 
