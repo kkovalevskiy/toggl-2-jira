@@ -16,8 +16,6 @@ namespace Toggl2Jira.UI.ViewModels
     {
         private readonly ObservableCollection<string> _activityList;
 
-        private readonly ITogglWorklogRepository _togglWorklogRepository;
-        private readonly IWorklogConverter _worklogConverter;
         private readonly IWorklogValidationService _worklogValidationService;
         private readonly IWorklogSynchronizationService _worklogSynchronizationService;
         private readonly IssueAutocompleteDataSource _issueAutocompleteDataSource;
@@ -26,22 +24,16 @@ namespace Toggl2Jira.UI.ViewModels
         private DateTime _toDate;
 
         public WorklogListViewModel(
-            ITogglWorklogRepository togglWorklogRepository,
-            IWorklogConverter worklogConverter,
             IWorklogValidationService worklogValidationService,
             IJiraIssuesRepository jiraIssuesRepository,
             IWorklogSynchronizationService worklogSynchronizationService,
             WorklogDataConfguration worklogDataConfguration)
         {
-            EnsureArg.IsNotNull(togglWorklogRepository);
-            EnsureArg.IsNotNull(worklogConverter);
             EnsureArg.IsNotNull(worklogValidationService);
             EnsureArg.IsNotNull(jiraIssuesRepository);
             EnsureArg.IsNotNull(worklogSynchronizationService);
             EnsureArg.IsNotNull(worklogDataConfguration);
 
-            _togglWorklogRepository = togglWorklogRepository;
-            _worklogConverter = worklogConverter;
             _worklogValidationService = worklogValidationService;
             _worklogSynchronizationService = worklogSynchronizationService;
             _activityList = new ObservableCollection<string>(worklogDataConfguration.Activities);
@@ -62,9 +54,15 @@ namespace Toggl2Jira.UI.ViewModels
                 SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
             };
 
+            NotMatchedWorklogs.CollectionChanged += (s, a) =>
+            {
+                DeleteNotMatchedWorklogsCommand.RaiseCanExecuteChanged();
+            };
+
             LoadWorklogsCommand = new DelegateCommand(InvokeLoadWorklogs, () => CanLoadWorklogs);
             ValidateWorklogsCommand = new DelegateCommand(InvokeValidateWorklogs, () => CanValidateWorklogs);
             SynchronizeWorklogsCommand = new DelegateCommand(InvokeSynchronizeWorklogs, () => CanSynchronizeWorklogs);
+            DeleteNotMatchedWorklogsCommand = new DelegateCommand(InvokeDeleteNotMatchedWorklogs, () => CanDeleteNotMatchedWorklogs);
         }
 
         public DateTime FromDate
@@ -86,13 +84,19 @@ namespace Toggl2Jira.UI.ViewModels
         private bool CanSynchronizeWorklogs => BusyCounter.IsBusy == false && Worklogs.Count != 0 &&
                                                Worklogs.All(w => w.HasErrors == false);
 
+        private bool CanDeleteNotMatchedWorklogs => NotMatchedWorklogs.Any();
+
         public DelegateCommand LoadWorklogsCommand { get; }
 
         public DelegateCommand ValidateWorklogsCommand { get; }
         
         public DelegateCommand SynchronizeWorklogsCommand { get; }
 
+        public DelegateCommand DeleteNotMatchedWorklogsCommand { get; }
+
         public ObservableCollection<WorklogViewModel> Worklogs { get; } = new ObservableCollection<WorklogViewModel>();
+
+        public ObservableCollection<Worklog> NotMatchedWorklogs { get; } = new ObservableCollection<Worklog>();
 
         public BusyCounter BusyCounter { get; } = new BusyCounter();
 
@@ -120,16 +124,18 @@ namespace Toggl2Jira.UI.ViewModels
             {
                 var fromDateToLoad = FromDate.Date;
                 var toDateToLoad = ToDate.Date + new TimeSpan(23, 59, 59);
-                var tempoWorklogs = await _togglWorklogRepository.GetWorklogsAsync(fromDateToLoad, toDateToLoad);
-                var worklogs = tempoWorklogs.Select(tw => _worklogConverter.FromTogglWorklog(tw));
-                var worklogsViewModels = worklogs.Select(CreateWorklogViewModel);
-                
+                var loadResult = await _worklogSynchronizationService.LoadAsync(fromDateToLoad, toDateToLoad);                
+                var worklogsViewModels = loadResult.Worklogs.Select(CreateWorklogViewModel);
+
                 foreach (var worklogViewModel in Worklogs)
                 {
                     worklogViewModel.ErrorsChanged -= OnChildViewModelErrorsChanged;
                 }
                 Worklogs.Clear();
                 Worklogs.AddRange(worklogsViewModels);
+
+                NotMatchedWorklogs.Clear();
+                NotMatchedWorklogs.AddRange(loadResult.NotMatchedWorklogs);
             }
 
             InvokeValidateWorklogs();
@@ -174,10 +180,10 @@ namespace Toggl2Jira.UI.ViewModels
             using (BusyCounter.StartBusyScope("Synchronizing worklogs"))
             {
                 var worklogNumber = 1;
-                var worklogsToSynchronize = Worklogs.Where(w => w.IsSynchronized == false).ToList();
+                var worklogsToSynchronize = Worklogs;
                 foreach (var worklogViewModel in worklogsToSynchronize)
                 {
-                    using (BusyCounter.StartBusyScope($"Synchronize worklog {worklogNumber}/{worklogsToSynchronize.Count}"))
+                    using (BusyCounter.StartBusyScope($"Synchronizing worklog {worklogNumber}/{worklogsToSynchronize.Count}"))
                     {
                         var result = await _worklogSynchronizationService.SynchronizeAsync(worklogViewModel.Worklog);                        
                         worklogViewModel.UpdateStatusFromSynchronizationResults(result);
@@ -188,6 +194,26 @@ namespace Toggl2Jira.UI.ViewModels
                         }
                         worklogNumber++;
                     }      
+                }
+            }
+        }
+
+        private async void InvokeDeleteNotMatchedWorklogs()
+        {
+            if (!CanDeleteNotMatchedWorklogs) return;
+
+            using(BusyCounter.StartBusyScope("Removing not matched worklogs"))
+            {
+                var worklogNumber = 1;
+                var worklogsToRemove = NotMatchedWorklogs.ToArray();
+                foreach(var worklog in worklogsToRemove)
+                {
+                    using(BusyCounter.StartBusyScope($"Removing not matched worklog {worklogNumber}/{worklogsToRemove.Length}"))
+                    {
+                        await _worklogSynchronizationService.DeleteAsync(worklog);
+                        worklogNumber++;
+                        NotMatchedWorklogs.Remove(worklog);
+                    }
                 }
             }
         }

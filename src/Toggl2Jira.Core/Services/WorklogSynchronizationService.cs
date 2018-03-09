@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EnsureThat;
 using Newtonsoft.Json;
@@ -37,35 +39,19 @@ namespace Toggl2Jira.Core.Services
         {
             EnsureArg.IsNotNull(worklog);
             
-            if (worklog.TogglWorklog?.IsSynchronized == true)
-            {
-                return SynchronizationResult.CreateSuccess();
-            }
-            
             var tempoWorklogToSend = CreateTempoWorklogToSend(worklog);
             var togglWorklogToSend = CreateTogglWorklogToSend(worklog);
             try
             {
-                // send to tempo                
-                if (tempoWorklogToSend.id.HasValue)
-                {
-                    throw new NotSupportedException("Updating exisiting tempo worklogs is not supported");
-                }
-                else
-                {
-                    await _tempoWorklogRepository.CreateTempoWorklogsAsync(new[] {tempoWorklogToSend});
-                }
-                                
-                // send to toggl                
-                if (togglWorklogToSend.id.HasValue)
-                {
-                    await _togglWorklogRepository.UpdateWorklogsAsync(new[] {togglWorklogToSend});    
-                }
-                else
-                {
-                    throw new NotSupportedException("Creating toggl worklogs isn't supported");
-                }
+                var saveToTempoTask = TempoWorklogComparer.Instance.Equals(worklog.TempoWorklog, tempoWorklogToSend) == false
+                    ? _tempoWorklogRepository.SaveWorklogsAsync(new[] { tempoWorklogToSend })
+                    : Task.CompletedTask;
+                var saveToTogglTask = TogglWorklogComparer.Instance.Equals(worklog.TogglWorklog, togglWorklogToSend) == false
+                    ? _togglWorklogRepository.SaveWorklogsAsync(new[] { togglWorklogToSend })
+                    : Task.CompletedTask;
 
+                await Task.WhenAll(saveToTempoTask, saveToTogglTask);
+                
                 worklog.TogglWorklog = togglWorklogToSend;
                 worklog.TempoWorklog = tempoWorklogToSend;
                 
@@ -85,11 +71,57 @@ namespace Toggl2Jira.Core.Services
             }
         }
 
+        public async Task<WorklogsLoadResult> LoadAsync(DateTime startDate, DateTime endDate)
+        {
+            var togglTask = _togglWorklogRepository.GetWorklogsAsync(startDate, endDate);
+            var tempoTask = _tempoWorklogRepository.GetWorklogsAsync(startDate, endDate);
+
+            await Task.WhenAll(togglTask, tempoTask);
+            var togglWorklogs = await togglTask;
+            var tempoWorklogs = await tempoTask;
+
+            var worklogs = togglWorklogs.Select(w => _worklogConverter.FromTogglWorklog(w)).ToArray();
+            var notMatchedTempoWorklogs = new List<Worklog>();
+            foreach (var tempoWorklog in tempoWorklogs)
+            {
+                var matchedWorklog = worklogs.FirstOrDefault(w => w.StartDate == tempoWorklog.dateStarted);
+                if (matchedWorklog == null)
+                {                    
+                    notMatchedTempoWorklogs.Add(new Worklog() { TempoWorklog = tempoWorklog});
+                }
+                else
+                {
+                    matchedWorklog.TempoWorklog = tempoWorklog;
+                }
+            }
+
+            return new WorklogsLoadResult() { NotMatchedWorklogs = notMatchedTempoWorklogs.ToArray(), Worklogs = worklogs };
+        }
+
+        public async Task DeleteAsync(Worklog worklog)
+        {
+            if(worklog.TempoWorklog != null)
+            {
+                await _tempoWorklogRepository.DeleteWorklogsAsync(new[] { worklog.TempoWorklog });
+                worklog.TempoWorklog = null;
+            }
+
+            if(worklog.TogglWorklog != null)
+            {
+                await _togglWorklogRepository.DeleteWorklogsAsync(new[] { worklog.TogglWorklog });
+                worklog.TogglWorklog = null;
+            }
+        }
+
+        private DateTime TrimToMinutes(DateTime value)
+        {
+            return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMinute, value.Kind);
+        }
+
         private TogglWorklog CreateTogglWorklogToSend(Worklog worklog)
         {
             var togglWorklogToSend = Clone(worklog.TogglWorklog);
             _worklogConverter.UpdateTogglWorklog(togglWorklogToSend, worklog);
-            togglWorklogToSend.IsSynchronized = true;
             return togglWorklogToSend;
         }
 
@@ -103,24 +135,23 @@ namespace Toggl2Jira.Core.Services
         private async Task RollbackSynchronizationAsync(Worklog worklog, TogglWorklog sentTogglWorklog, TempoWorklog sentTempoWorklog)
         {
             if (worklog.TogglWorklog?.id != null)
-            {
-                // restore old value
-                await _togglWorklogRepository.UpdateWorklogsAsync(new[] {worklog.TogglWorklog});
+            {                
+                await _togglWorklogRepository.SaveWorklogsAsync(new[] {worklog.TogglWorklog});
             }
             else
-            {
-                //await _togglWorklogRepository.DeleteWorklogsAsync(new[] {sentTogglWorklog});
-                throw new NotSupportedException("Deletion of toggl worklogs is not supported");
+            {                
+                await _togglWorklogRepository.DeleteWorklogsAsync(new[] {sentTogglWorklog});
+                worklog.TogglWorklog = null;
             }
 
             if (worklog.TempoWorklog?.id != null)
             {   
-                //await _tempoWorklogRepository.DeleteTempoWorklogsAsync(new[] {worklog.TempoWorklog});
-                throw new NotSupportedException("Update of tempo worklogs is not supported");                
+                await _tempoWorklogRepository.SaveWorklogsAsync(new[] {worklog.TempoWorklog});
             }
             else
             {
-                await _tempoWorklogRepository.DeleteTempoWorklogsAsync(new[] {sentTempoWorklog});
+                await _tempoWorklogRepository.DeleteWorklogsAsync(new[] {sentTempoWorklog});
+                worklog.TempoWorklog = null;
             }            
         }
     }

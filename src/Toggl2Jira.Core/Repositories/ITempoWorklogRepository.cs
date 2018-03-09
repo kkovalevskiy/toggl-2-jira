@@ -7,10 +7,10 @@ namespace Toggl2Jira.Core.Repositories
 {
     public interface ITempoWorklogRepository
     {
-        Task<IEnumerable<TempoWorklog>> GetTempoWorklogsAsync(DateTime? from = null, DateTime? to = null);
+        Task<IEnumerable<TempoWorklog>> GetWorklogsAsync(DateTime? startDate = null, DateTime? endDate = null);
 
-        Task CreateTempoWorklogsAsync(IEnumerable<TempoWorklog> worklogs);
+        Task SaveWorklogsAsync(IEnumerable<TempoWorklog> worklogs);
 
-        Task DeleteTempoWorklogsAsync(IEnumerable<TempoWorklog> worklogs);
+        Task DeleteWorklogsAsync(IEnumerable<TempoWorklog> worklogs);
     }
 }

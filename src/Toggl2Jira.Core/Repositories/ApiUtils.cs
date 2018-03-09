@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,16 @@ namespace Toggl2Jira.Core.Repositories
 {    
     public static class ApiUtils
     {
+        public static JsonSerializerSettings GetSerializerSettings()
+        {
+            return new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DateFormatString = "yyyy-MM-ddTHH:mm:ss.000",
+                DateTimeZoneHandling = DateTimeZoneHandling.Local
+            };
+        }
+
         public static void EnsureSuccessStatus(this HttpResponseMessage message)
         {            
             if (message.IsSuccessStatusCode == false)

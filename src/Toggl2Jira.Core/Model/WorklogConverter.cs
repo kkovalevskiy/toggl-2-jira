@@ -17,6 +17,19 @@ namespace Toggl2Jira.Core.Model
             _configuration = configuration;
         }
 
+        public Worklog FromTempoWorklog(TempoWorklog originalWorklog)
+        {
+            return new Worklog()
+            {
+                Activity = originalWorklog?.worklogAttributes.FirstOrDefault(a => a.key == "_Activity_")?.value?.Replace("%20", " ")?.Replace("%2F", "/"),
+                Comment = originalWorklog.comment,
+                Duration = TimeSpan.FromSeconds(originalWorklog.timeSpentSeconds),
+                IssueKey = originalWorklog.issue?.key,
+                StartDate = originalWorklog.dateStarted,
+                TempoWorklog = originalWorklog
+            };
+        }
+
         public Worklog FromTogglWorklog(TogglWorklog originalWorklog)
         {
             var issueKey = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex, "IssueKey");
@@ -145,6 +158,6 @@ namespace Toggl2Jira.Core.Model
             }
 
             return value.Trim();
-        }
+        }        
     }
 }

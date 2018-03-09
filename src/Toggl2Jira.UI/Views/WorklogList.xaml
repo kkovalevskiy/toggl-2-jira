@@ -37,6 +37,7 @@
                         </Style>
                     </StackPanel.Resources>
                     <Button Command="{Binding LoadWorklogsCommand}" Content="Load" />
+                    <Button Command="{Binding DeleteNotMatchedWorklogsCommand}" Content="Delete Not Matched" />
                     <Button Command="{Binding ValidateWorklogsCommand}" Content="Validate"/>
                     <Button Command="{Binding SynchronizeWorklogsCommand}" Content="Synchronize" />
                 </StackPanel>
@@ -126,14 +127,14 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>                        
                     </DataGridTemplateColumn>
-                    
+
                     <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate DataType="vm:WorklogViewModel">
                                 <TextBlock Text="{Binding Duration}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
-                        
+
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate DataType="vm:WorklogViewModel">
                                 <xctk:TimeSpanUpDown 
@@ -142,12 +143,9 @@
                                     FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
                                 </xctk:TimeSpanUpDown>
                             </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>                        
+                        </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-                    
-                    <DataGridCheckBoxColumn Binding="{Binding IsSynchronized}" Header="Is Sync">
-                    </DataGridCheckBoxColumn>
-                    
+
                     <DataGridTextColumn Binding="{Binding SynchronizationStatus}" IsReadOnly="True" Header="Sync Status">                        
                     </DataGridTextColumn>                                        
                 </DataGrid.Columns>

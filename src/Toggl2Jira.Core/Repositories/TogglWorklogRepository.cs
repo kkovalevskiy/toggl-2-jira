@@ -13,8 +13,8 @@ namespace Toggl2Jira.Core.Repositories
 {
     public class TogglWorklogRepository : ITogglWorklogRepository
     {
-        private const string TogglTimeEntryUrl = "https://www.toggl.com/api/v8/time_entries";
         private readonly TogglConfiguration _configuration;
+        private const string TogglTimeEntryUrl = "https://www.toggl.com/api/v8/time_entries";
 
         public TogglWorklogRepository(TogglConfiguration configuration)
         {
@@ -37,38 +37,56 @@ namespace Toggl2Jira.Core.Repositories
                 var response = await client.SendAsync(httpRequest);
                 response.EnsureSuccessStatus();
                 var content = await response.Content.ReadAsStringAsync();
-                var logs = JsonConvert.DeserializeObject<TogglWorklog[]>(content, GetSettings());
+                var logs = JsonConvert.DeserializeObject<TogglWorklog[]>(content, ApiUtils.GetSerializerSettings());
                 return logs;
             }
         }
 
-        public async Task UpdateWorklogsAsync(IEnumerable<TogglWorklog> worklogsToUpdate)
+        public async Task SaveWorklogsAsync(IEnumerable<TogglWorklog> worklogsToUpdate)
         {
             using (var client = new HttpClient())
             {
                 foreach (var worklog in worklogsToUpdate)
-                {
-                    var uri = TogglTimeEntryUrl + "/" + worklog.id;
-                    var request = CreateRequest(HttpMethod.Put, uri);
+                {                    
+                    var request = CreateSaveWorklogRequest(worklog);                                        
                     var jobject = JObject.FromObject(new
                     {
                         time_entry = worklog
-                    });
+                    },
+                    JsonSerializer.Create(ApiUtils.GetSerializerSettings()));
                     request.Content = new StringContent(jobject.ToString(), Encoding.UTF8, "application/json");
+                    var result = await client.SendAsync(request);
+                    result.EnsureSuccessStatus();
+
+                    var stringResult = await result.Content.ReadAsStringAsync();
+                    var resultObject = JObject.Parse(stringResult);
+                    worklog.id = resultObject["data"]["id"].ToObject<int?>();
+                    worklog.guid = resultObject["data"]["guid"].ToObject<Guid?>();
+                }
+            }
+        }
+
+        public async Task DeleteWorklogsAsync(IEnumerable<TogglWorklog> worklogsToRemove)
+        {
+            using (var client = new HttpClient())
+            {
+                foreach (var worklog in worklogsToRemove)
+                {
+                    var request = CreateRequest(HttpMethod.Delete, TogglTimeEntryUrl + $"/{worklog.id}");                    
                     var result = await client.SendAsync(request);
                     result.EnsureSuccessStatus();
                 }
             }
         }
 
-        private JsonSerializerSettings GetSettings()
+        private HttpRequestMessage CreateSaveWorklogRequest(TogglWorklog worklog)
         {
-            return new JsonSerializerSettings
+            if (worklog.id.HasValue)
             {
-                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat,
-                DateParseHandling = DateParseHandling.DateTime
-            };
+                return CreateRequest(HttpMethod.Put, TogglTimeEntryUrl + $"/{worklog.id}");
+            }
+
+            return CreateRequest(HttpMethod.Post, TogglTimeEntryUrl);
         }
 
         private HttpRequestMessage CreateRequest(HttpMethod method, string uri)

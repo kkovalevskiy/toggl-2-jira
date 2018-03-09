@@ -3,6 +3,8 @@
     public interface IWorklogConverter
     {
         Worklog FromTogglWorklog(TogglWorklog originalWorklog);
+
+        Worklog FromTempoWorklog(TempoWorklog originalWorklog);
         
         void UpdateTogglWorklog(TogglWorklog target, Worklog source);
 

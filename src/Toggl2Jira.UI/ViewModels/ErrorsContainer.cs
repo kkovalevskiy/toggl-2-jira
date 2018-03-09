@@ -30,6 +30,8 @@ namespace Toggl2Jira.UI.ViewModels
 
         public void ClearErrors(string propertyName)
         {
+            CoercePropertyName(ref propertyName);
+
             if (_propertyNameToErrorsMap.ContainsKey(propertyName))
             {
                 _propertyNameToErrorsMap.Remove(propertyName);
@@ -39,6 +41,8 @@ namespace Toggl2Jira.UI.ViewModels
 
         public void AddError(string propertyName, T error)
         {
+            CoercePropertyName(ref propertyName);
+
             if (!_propertyNameToErrorsMap.TryGetValue(propertyName, out var errors))
             {
                 errors = new List<T>();
@@ -50,12 +54,22 @@ namespace Toggl2Jira.UI.ViewModels
 
         public IEnumerable<T> GetErrors(string propertyName)
         {
+            CoercePropertyName(ref propertyName);
+
             if (_propertyNameToErrorsMap.TryGetValue(propertyName, out var errors))
             {
                 return errors;
             }
             
             return Array.Empty<T>();
+        }
+
+        private void CoercePropertyName(ref string propertyName)
+        {
+            if (propertyName == null)
+            {
+                propertyName = "";
+            }
         }
     }
 }

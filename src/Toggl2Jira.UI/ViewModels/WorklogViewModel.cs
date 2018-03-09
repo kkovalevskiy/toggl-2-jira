@@ -29,7 +29,6 @@ namespace Toggl2Jira.UI.ViewModels
                 }
                 _worklog.IssueKey = value;
                 IssueSummary = null; // reset Issue Summary
-                IsSynchronized = false;
                 RaisePropertyChanged(nameof(IssueKey));                
             }
         }
@@ -51,7 +50,6 @@ namespace Toggl2Jira.UI.ViewModels
                 }
 
                 _worklog.Activity = value;
-                IsSynchronized = false;
                 RaisePropertyChanged(nameof(Activity));
             }
         }                
@@ -71,7 +69,6 @@ namespace Toggl2Jira.UI.ViewModels
                 }
 
                 _worklog.Comment = value;
-                IsSynchronized = false;
                 RaisePropertyChanged();
             }
         }
@@ -87,7 +84,6 @@ namespace Toggl2Jira.UI.ViewModels
                 }
 
                 _worklog.StartDate = value;
-                IsSynchronized = false;
                 RaisePropertyChanged();
             }
         }
@@ -103,29 +99,12 @@ namespace Toggl2Jira.UI.ViewModels
                 }
 
                 _worklog.Duration = value;
-                IsSynchronized = false;
                 RaisePropertyChanged();
             }
         }
         
-        public string SynchronizationStatus => Worklog.TogglWorklog.IsSynchronized ? "Success" : _synchronizationError;
-
-        public bool IsSynchronized
-        {
-            get => Worklog.TogglWorklog.IsSynchronized;
-            set
-            {
-                if (Worklog.TogglWorklog.IsSynchronized == value)
-                {
-                    return;
-                }
-
-                Worklog.TogglWorklog.IsSynchronized = value;
-                RaisePropertyChanged();
-                RaisePropertyChanged(nameof(SynchronizationStatus));
-            }
-        }
-
+        public string SynchronizationStatus => _synchronizationError;
+        
         public Worklog Worklog => _worklog;        
 
         public void UpdateStatusFromValidationResults(WorklogValidationResults result)
@@ -136,20 +115,20 @@ namespace Toggl2Jira.UI.ViewModels
         }
 
         public void UpdateStatusFromSynchronizationResults(SynchronizationResult syncResult)
-        {            
+        {
+            _synchronizationError = "";
             if (syncResult.SynchronizationError != null)
             {
-                _synchronizationError = $"Synchronization Error: \"{syncResult.SynchronizationError.Message}\"";                
+                _synchronizationError += $"Synchronization Error: \"{syncResult.SynchronizationError.Message}\"";                
             }
             
             if (syncResult.RollbackSynchronizationError != null)
             {
                 _synchronizationError += Environment.NewLine;
-                _synchronizationError = $"Rollback Synchronization Error: \"{syncResult.RollbackSynchronizationError.Message}\"";
+                _synchronizationError += $"Rollback Synchronization Error: \"{syncResult.RollbackSynchronizationError.Message}\"";
             }
             
             RaisePropertyChanged(nameof(SynchronizationStatus));
-            RaisePropertyChanged(nameof(IsSynchronized));
         }        
     }    
 }

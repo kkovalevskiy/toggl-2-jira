@@ -9,6 +9,8 @@ namespace Toggl2Jira.Core.Repositories
     {
         Task<IEnumerable<TogglWorklog>> GetWorklogsAsync(DateTime? startDate = null, DateTime? endDate = null);
 
-        Task UpdateWorklogsAsync(IEnumerable<TogglWorklog> worklogsToUpdate);
+        Task SaveWorklogsAsync(IEnumerable<TogglWorklog> worklogsToUpdate);
+
+        Task DeleteWorklogsAsync(IEnumerable<TogglWorklog> worklogsToRemove);
     }
 }
