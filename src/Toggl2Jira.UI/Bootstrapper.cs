@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.IO;
 using System.Reflection;
 using System.Windows;
 using Autofac;
 using Microsoft.Extensions.Configuration;
 using Prism.Autofac;
 using Toggl2Jira.Core;
-using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
-using Toggl2Jira.Core.Services;
 using Toggl2Jira.UI.Views;
 
 namespace Toggl2Jira.UI
@@ -17,16 +15,8 @@ namespace Toggl2Jira.UI
         protected override void ConfigureContainerBuilder(ContainerBuilder builder)
         {
             base.ConfigureContainerBuilder(builder);
-            
-            var configValues = new Dictionary<string, string>()
-            {
-                
-            };
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(configValues)
-                .Build();
-            
-            var config = Configuration.FromEnvironmentConfig(configuration);
+                                  
+            var config = ReadConfiguration();
                         
             builder.RegisterInstance(config.JiraConfiguration).AsSelf();
             builder.RegisterInstance(config.TogglConfiguration).AsSelf();
@@ -49,6 +39,16 @@ namespace Toggl2Jira.UI
         protected override void InitializeShell()
         {
             Application.Current?.MainWindow?.Show();
+        }
+
+        private Configuration ReadConfiguration()
+        {
+            var configFile = new ConfigurationBuilder()
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("worklogconfig.json")
+               .Build();
+
+            return Configuration.FromEnvironmentConfig(configFile);
         }
     }
 }

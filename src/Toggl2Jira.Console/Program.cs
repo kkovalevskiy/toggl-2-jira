@@ -15,7 +15,7 @@ namespace Toggl2Jira.Console
         {
             var configFile = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appconfig.json")
+                .AddJsonFile("worklogconfig.json")
                 .Build();
             
             var config = Configuration.FromEnvironmentConfig(configFile);
