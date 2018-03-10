@@ -68,13 +68,25 @@ namespace Toggl2Jira.UI.ViewModels
         public DateTime FromDate
         {
             get => _fromDate;
-            set => SetProperty(ref _fromDate, value, ValidateDates);
+            set => SetProperty(ref _fromDate, value, () => {
+                if(FromDate > ToDate)
+                {
+                    ToDate = FromDate;
+                }
+                ValidateDates();
+            });
         }
 
         public DateTime ToDate
         {
             get => _toDate;
-            set => SetProperty(ref _toDate, value, ValidateDates);
+            set => SetProperty(ref _toDate, value, () => {
+                if(FromDate > ToDate)
+                {
+                    FromDate = ToDate;
+                }
+                ValidateDates();
+            });
         }
 
         private bool CanLoadWorklogs => HasErrors == false && BusyCounter.IsBusy == false;
