@@ -24,5 +24,23 @@ namespace Toggl2Jira.Core.Services
         public Exception SynchronizationError { get; set; }
             
         public Exception RollbackSynchronizationError { get; set; }
+
+        public string GetErrorText()
+        {
+            var result = string.Empty;
+            
+            if(SynchronizationError != null)
+            {
+                result += $"Synchronization Error: \"{SynchronizationError.Message}\"";
+            }
+
+            if (RollbackSynchronizationError != null)
+            {
+                result += Environment.NewLine;
+                result += $"Rollback Synchronization Error: \"{RollbackSynchronizationError.Message}\"";
+            }
+
+            return result;
+        }
     }
 }

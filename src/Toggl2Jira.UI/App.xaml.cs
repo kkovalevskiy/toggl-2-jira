@@ -21,7 +21,8 @@ namespace Toggl2Jira.UI
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs args)
         {
-            
+            MessageBox.Show(args.Exception.ToString(), "Unhandled Exception has occured", MessageBoxButton.OK, MessageBoxImage.Error);
+            args.Handled = true;
         }
     }
 }

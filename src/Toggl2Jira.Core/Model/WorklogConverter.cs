@@ -4,11 +4,21 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using EnsureThat;
+using Newtonsoft.Json;
 
 namespace Toggl2Jira.Core.Model
 {
     public class WorklogConverter: IWorklogConverter
     {
+        private static T CreateOrClone<T>(T originalValue) where T : new()
+        {
+            if (originalValue == null)
+            {
+                return new T();
+            }
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(originalValue));
+        }
+
         private readonly WorklogDataConfguration _configuration;
 
         public WorklogConverter(WorklogDataConfguration configuration)
@@ -58,8 +68,9 @@ namespace Toggl2Jira.Core.Model
             };
         }
 
-        public void UpdateTogglWorklog(TogglWorklog target, Worklog source)
+        public TogglWorklog ToTogglWorklog(Worklog source)
         {
+            var target = CreateOrClone(source.TogglWorklog);
             var targetFormatString = _configuration.TogglWorklogCommentFormatString
                 .Replace("{IssueKey}", "{0}")
                 .Replace("{Activity}", "{1}")
@@ -96,15 +107,18 @@ namespace Toggl2Jira.Core.Model
             target.start = source.StartDate;
             target.stop = source.StartDate.Add(source.Duration);
             target.duration = (int) source.Duration.TotalSeconds;
+
+            return target;
         }
         
-        public void UpdateTempoWorklog(TempoWorklog target, Worklog source)
+        public TempoWorklog ToTempoWorklog(Worklog source)
         {
-            target.comment = source.Comment;
-            target.dateStarted = source.StartDate;
-            target.timeSpentSeconds = (int) source.Duration.TotalSeconds;
-            target.issue = new issue {key = source.IssueKey};
-            target.worklogAttributes = new worklogAttribute[1]
+            var result = CreateOrClone(source.TempoWorklog);
+            result.comment = source.Comment;
+            result.dateStarted = source.StartDate;
+            result.timeSpentSeconds = (int) source.Duration.TotalSeconds;
+            result.issue = new issue {key = source.IssueKey};
+            result.worklogAttributes = new worklogAttribute[1]
             {
                 new worklogAttribute
                 {
@@ -112,6 +126,7 @@ namespace Toggl2Jira.Core.Model
                     key = "_Activity_"
                 }
             };
+            return result;
         }
 
         private string ParseActivity(string parsedIssueKey, string parsedComment, TogglWorklog originalWorklog)

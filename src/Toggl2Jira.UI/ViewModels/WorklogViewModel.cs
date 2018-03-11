@@ -9,12 +9,15 @@ namespace Toggl2Jira.UI.ViewModels
     public class WorklogViewModel: ValidatableBindableBase
     {
         private readonly Worklog _worklog;
+        private readonly ISynchronizationStatusBuilder _statusBuilder;
         private string _issueSummary;
         private string _synchronizationError;
 
-        public WorklogViewModel(Worklog worklog)
+        public WorklogViewModel(Worklog worklog, ISynchronizationStatusBuilder statusBuilder)
         {
             EnsureArg.IsNotNull(worklog);
+            EnsureArg.IsNotNull(statusBuilder);
+            _statusBuilder = statusBuilder;
             _worklog = worklog;
         }
 
@@ -29,7 +32,10 @@ namespace Toggl2Jira.UI.ViewModels
                 }
                 _worklog.IssueKey = value;
                 IssueSummary = null; // reset Issue Summary
-                RaisePropertyChanged(nameof(IssueKey));                
+                RaisePropertyChanged(nameof(IssueKey));
+                RaisePropertyChanged(nameof(TempoWorklogStatus));
+                RaisePropertyChanged(nameof(TogglWorklogStatus));
+                RaisePropertyChanged(nameof(CombinedStatus));
             }
         }
 
@@ -51,6 +57,9 @@ namespace Toggl2Jira.UI.ViewModels
 
                 _worklog.Activity = value;
                 RaisePropertyChanged(nameof(Activity));
+                RaisePropertyChanged(nameof(TempoWorklogStatus));
+                RaisePropertyChanged(nameof(TogglWorklogStatus));
+                RaisePropertyChanged(nameof(CombinedStatus));
             }
         }                
         
@@ -70,6 +79,9 @@ namespace Toggl2Jira.UI.ViewModels
 
                 _worklog.Comment = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(TempoWorklogStatus));
+                RaisePropertyChanged(nameof(TogglWorklogStatus));
+                RaisePropertyChanged(nameof(CombinedStatus));
             }
         }
 
@@ -85,7 +97,16 @@ namespace Toggl2Jira.UI.ViewModels
 
                 _worklog.StartDate = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(FormattedStartDateString));
+                RaisePropertyChanged(nameof(TempoWorklogStatus));
+                RaisePropertyChanged(nameof(TogglWorklogStatus));
+                RaisePropertyChanged(nameof(CombinedStatus));
             }
+        }
+
+        public string FormattedStartDateString
+        {
+            get => StartDate.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         public TimeSpan Duration
@@ -100,12 +121,23 @@ namespace Toggl2Jira.UI.ViewModels
 
                 _worklog.Duration = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(TempoWorklogStatus));
+                RaisePropertyChanged(nameof(TogglWorklogStatus));
+                RaisePropertyChanged(nameof(CombinedStatus));
             }
         }
-        
-        public string SynchronizationStatus => _synchronizationError;
-        
-        public Worklog Worklog => _worklog;        
+
+        public string SynchronizationError => _synchronizationError;
+
+        public bool HasSynchronizationError => string.IsNullOrWhiteSpace(_synchronizationError) == false;
+
+        public WorklogSynchronizationStatus TogglWorklogStatus => _statusBuilder.GetTogglWorklogStatus(Worklog);
+
+        public WorklogSynchronizationStatus TempoWorklogStatus => _statusBuilder.GetTempoWorklogStatus(Worklog);
+
+        public string CombinedStatus => _statusBuilder.GetCombinedStatus(Worklog, _synchronizationError);
+
+        public Worklog Worklog => _worklog;     
 
         public void UpdateStatusFromValidationResults(WorklogValidationResults result)
         {
@@ -116,19 +148,12 @@ namespace Toggl2Jira.UI.ViewModels
 
         public void UpdateStatusFromSynchronizationResults(SynchronizationResult syncResult)
         {
-            _synchronizationError = "";
-            if (syncResult.SynchronizationError != null)
-            {
-                _synchronizationError += $"Synchronization Error: \"{syncResult.SynchronizationError.Message}\"";                
-            }
-            
-            if (syncResult.RollbackSynchronizationError != null)
-            {
-                _synchronizationError += Environment.NewLine;
-                _synchronizationError += $"Rollback Synchronization Error: \"{syncResult.RollbackSynchronizationError.Message}\"";
-            }
-            
-            RaisePropertyChanged(nameof(SynchronizationStatus));
+            _synchronizationError = syncResult.GetErrorText();
+            RaisePropertyChanged(nameof(SynchronizationError));
+            RaisePropertyChanged(nameof(HasSynchronizationError));
+            RaisePropertyChanged(nameof(TogglWorklogStatus));
+            RaisePropertyChanged(nameof(TempoWorklogStatus));
+            RaisePropertyChanged(nameof(CombinedStatus));
         }        
     }    
 }

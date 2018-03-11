@@ -23,7 +23,8 @@ namespace Toggl2Jira.Core
             "Other",
             "Design/Analysis",
             "Development",
-            "Code Review Fixes"
+            "Code Review Fixes",
+            "Bugfixing"
         };
 
         public Dictionary<string, string> ActivityAliases { get; set; } = new Dictionary<string, string>

@@ -6,6 +6,8 @@
              xmlns:local="clr-namespace:Toggl2Jira.UI.Views"
              xmlns:vm="clr-namespace:Toggl2Jira.UI.ViewModels"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:utils="clr-namespace:Toggl2Jira.UI.Utils"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance d:Type = vm:WorklogListViewModel, IsDesignTimeCreatable = False}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -14,6 +16,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <StackPanel Orientation="Horizontal" Grid.Row="0">
@@ -37,120 +40,178 @@
                         </Style>
                     </StackPanel.Resources>
                     <Button Command="{Binding LoadWorklogsCommand}" Content="Load" />
-                    <Button Command="{Binding DeleteNotMatchedWorklogsCommand}" Content="Delete Not Matched" />
                     <Button Command="{Binding ValidateWorklogsCommand}" Content="Validate"/>
                     <Button Command="{Binding SynchronizeWorklogsCommand}" Content="Synchronize" />
                 </StackPanel>
             </StackPanel>
 
-            <DataGrid 
-                ItemsSource="{Binding Worklogs}" 
-                AutoGenerateColumns="False" 
-                Grid.Row="1" 
-                HeadersVisibility="Column"
-                CanUserDeleteRows="False"
-                CanUserAddRows="False"
-                Margin = "5">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="IssueKey" SortMemberPath="IssueKey">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBlock Text="{Binding IssueKey}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <local:Autocomplete 
-                                    Text="{Binding IssueKey}" 
-                                    AutocompleteDataSource="{Binding IssueAutocompleteDataSource}"
-                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
-                                </local:Autocomplete>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    
-                    <DataGridTextColumn 
-                        Header="Issue Summary" 
-                        Binding="{Binding IssueSummary}" 
-                        IsReadOnly="True">                        
-                    </DataGridTextColumn>
-                    
-                    <DataGridTemplateColumn Header="Activity" SortMemberPath="Activity">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBlock Text="{Binding Activity}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <ComboBox 
-                                    ItemsSource="{Binding ActivityList}" 
-                                    SelectedItem="{Binding Activity}" 
-                                    Style="{StaticResource {x:Type ComboBox}}"
-                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
-                                </ComboBox>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    
-                    <DataGridTemplateColumn Header="Comment" SortMemberPath="Comment">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBlock Text="{Binding Comment}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBox
-                                    Text="{Binding Comment}"
-                                    Style="{StaticResource {x:Type TextBox}}"
-                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">                                    
-                                </TextBox>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    
-                    <DataGridTemplateColumn Header="Start Date" SortMemberPath="StartDate">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBlock Text="{Binding StartDate}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <xctk:DateTimePicker 
-                                    Value="{Binding StartDate}" 
-                                    Style="{StaticResource {x:Type xctk:DateTimePicker}}"
-                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
-                                </xctk:DateTimePicker>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>                        
-                    </DataGridTemplateColumn>
+            <Grid Grid.Row="1" Margin="10,0,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
 
-                    <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <TextBlock Text="{Binding Duration}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                <TextBlock Style="{StaticResource HeaderTextBlock}" Text="Worklogs"></TextBlock>
 
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate DataType="vm:WorklogViewModel">
-                                <xctk:TimeSpanUpDown 
-                                    Value="{Binding Duration}" 
-                                    Style="{StaticResource {x:Type xctk:TimeSpanUpDown}}"
-                                    FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
-                                </xctk:TimeSpanUpDown>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
+                <DataGrid 
+                    ItemsSource="{Binding Worklogs}" 
+                    AutoGenerateColumns="False"                 
+                    HeadersVisibility="Column"
+                    CanUserDeleteRows="False"
+                    CanUserAddRows="False"
+                    Grid.Row="1"
+                    SelectedItem="{Binding SelectedWorklog, Mode=TwoWay}"                    
+                    SelectionMode="Single">
+                    <i:Interaction.Behaviors>
+                        <utils:DataGridCopyPasteBehavior></utils:DataGridCopyPasteBehavior>
+                    </i:Interaction.Behaviors>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="IssueKey" SortMemberPath="IssueKey" ClipboardContentBinding="{Binding IssueKey}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBlock Text="{Binding IssueKey}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <local:Autocomplete 
+                                        Text="{Binding IssueKey}" 
+                                        AutocompleteDataSource="{Binding IssueAutocompleteDataSource}"
+                                        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                    </local:Autocomplete>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Binding="{Binding SynchronizationStatus}" IsReadOnly="True" Header="Sync Status">                        
-                    </DataGridTextColumn>                                        
-                </DataGrid.Columns>
-            </DataGrid>
+                        <DataGridTextColumn 
+                            Header="Issue Summary" 
+                            Binding="{Binding IssueSummary}" 
+                            ClipboardContentBinding="{Binding IssueSummary}"
+                            IsReadOnly="True">
+                        </DataGridTextColumn>
 
+                        <DataGridTemplateColumn Header="Activity" SortMemberPath="Activity" ClipboardContentBinding="{Binding Activity}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBlock Text="{Binding Activity}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <ComboBox 
+                                        ItemsSource="{Binding ActivityList}" 
+                                        SelectedItem="{Binding Activity}" 
+                                        Style="{StaticResource {x:Type ComboBox}}"
+                                        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Comment" SortMemberPath="Comment" ClipboardContentBinding="{Binding Comment}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBlock Text="{Binding Comment}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBox
+                                        Text="{Binding Comment}"
+                                        Style="{StaticResource {x:Type TextBox}}"
+                                        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                    </TextBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Start Date" SortMemberPath="StartDate" ClipboardContentBinding="{Binding FormattedStartDateString}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBlock Text="{Binding FormattedStartDateString}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <xctk:DateTimePicker 
+                                        Value="{Binding StartDate}"                                     
+                                        Format="Custom"
+                                        FormatString="yyyy-MM-dd HH:mm:ss"                                    
+                                        Style="{StaticResource {x:Type xctk:DateTimePicker}}"
+                                        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                    </xctk:DateTimePicker>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Duration" SortMemberPath="Duration" ClipboardContentBinding="{Binding Duration}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <TextBlock Text="{Binding Duration}" Style="{StaticResource {x:Type TextBlock}}"></TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <xctk:TimeSpanUpDown 
+                                        Value="{Binding Duration}" 
+                                        Style="{StaticResource {x:Type xctk:TimeSpanUpDown}}"
+                                        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+                                    </xctk:TimeSpanUpDown>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Toggl Status" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <Image Source="{Binding TogglWorklogStatus, Converter={StaticResource SynchronizationStatusToImageConverter}}"></Image>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Tempo Status" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <Image Source="{Binding TempoWorklogStatus, Converter={StaticResource SynchronizationStatusToImageConverter}}"></Image>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="Sync Error" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="vm:WorklogViewModel">
+                                    <Image Source="/Images/synchronizationError.png" Visibility="{Binding HasSynchronizationError, Converter={StaticResource BooleanToVisibilityConverter}}"></Image>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            
+            <Grid Grid.Row="2" MinHeight="200" Margin="10,0,10,10" Visibility="{Binding SelectedWorklog, Converter={StaticResource NullableVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource HeaderTextBlock}" Text="Selected Worklog Info"></TextBlock>
+                <Border Grid.Row="1" Background="LightYellow" BorderBrush="CornflowerBlue" CornerRadius="3" BorderThickness="2">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <TextBox 
+                            FontFamily="Consolas" 
+                            Text="{Binding SelectedWorklog.CombinedStatus, Mode=OneWay}" 
+                            Margin="10,5,0,0"
+                            IsReadOnly="True"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            TextWrapping="Wrap">
+                        </TextBox>
+                        <!--<TextBlock FontFamily="Consolas" Text="{Binding SelectedWorklog.CombinedStatus}" Margin="10,5,0,0"></TextBlock>-->
+                    </ScrollViewer>
+                </Border>
+            </Grid>
         </Grid>
     </xctk:BusyIndicator>
 </UserControl>

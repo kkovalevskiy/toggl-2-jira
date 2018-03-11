@@ -6,8 +6,8 @@
 
         Worklog FromTempoWorklog(TempoWorklog originalWorklog);
         
-        void UpdateTogglWorklog(TogglWorklog target, Worklog source);
+        TogglWorklog ToTogglWorklog(Worklog source);
 
-        void UpdateTempoWorklog(TempoWorklog target, Worklog source);
+        TempoWorklog ToTempoWorklog(Worklog source);
     }
 }

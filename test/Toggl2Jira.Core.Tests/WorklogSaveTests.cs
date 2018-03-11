@@ -31,9 +31,7 @@ namespace Toggl2Jira.Core.Tests
 
         private TogglWorklog ConvertTogglWorklog(Worklog worklog)
         {
-            var result = new TogglWorklog();
-            _converter.UpdateTogglWorklog(result, worklog);
-            return result;
+            return _converter.ToTogglWorklog(worklog);
         }
 
         [Test]

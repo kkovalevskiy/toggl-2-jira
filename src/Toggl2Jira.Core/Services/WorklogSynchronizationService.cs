@@ -3,23 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EnsureThat;
-using Newtonsoft.Json;
 using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
 
 namespace Toggl2Jira.Core.Services
 {
     public class WorklogSynchronizationService: IWorklogSynchronizationService
-    {
-        private static T Clone<T>(T originalValue) where T : new()
-        {
-            if (originalValue == null)
-            {
-                return new T();
-            }
-            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(originalValue));
-        }
-        
+    {               
         private readonly IWorklogConverter _worklogConverter;
         private readonly ITempoWorklogRepository _tempoWorklogRepository;
         private readonly ITogglWorklogRepository _togglWorklogRepository;
@@ -66,12 +56,12 @@ namespace Toggl2Jira.Core.Services
                 {
                     return SynchronizationResult.CreateRollbackSynchronizationError(syncException, rollbackException);
                 }
-
+                
                 return SynchronizationResult.CreateSynchronizationError(syncException);
             }
         }
 
-        public async Task<WorklogsLoadResult> LoadAsync(DateTime startDate, DateTime endDate)
+        public async Task<IList<Worklog>> LoadAsync(DateTime startDate, DateTime endDate)
         {
             var togglTask = _togglWorklogRepository.GetWorklogsAsync(startDate, endDate);
             var tempoTask = _tempoWorklogRepository.GetWorklogsAsync(startDate, endDate);
@@ -80,14 +70,13 @@ namespace Toggl2Jira.Core.Services
             var togglWorklogs = await togglTask;
             var tempoWorklogs = await tempoTask;
 
-            var worklogs = togglWorklogs.Select(w => _worklogConverter.FromTogglWorklog(w)).ToArray();
-            var notMatchedTempoWorklogs = new List<Worklog>();
+            var worklogs = togglWorklogs.Select(w => _worklogConverter.FromTogglWorklog(w)).ToList();
             foreach (var tempoWorklog in tempoWorklogs)
             {
                 var matchedWorklog = worklogs.FirstOrDefault(w => w.StartDate == tempoWorklog.dateStarted);
                 if (matchedWorklog == null)
                 {                    
-                    notMatchedTempoWorklogs.Add(new Worklog() { TempoWorklog = tempoWorklog});
+                    worklogs.Add(_worklogConverter.FromTempoWorklog(tempoWorklog));
                 }
                 else
                 {
@@ -95,7 +84,7 @@ namespace Toggl2Jira.Core.Services
                 }
             }
 
-            return new WorklogsLoadResult() { NotMatchedWorklogs = notMatchedTempoWorklogs.ToArray(), Worklogs = worklogs };
+            return worklogs.OrderBy(w => w.StartDate).ToList();
         }
 
         public async Task DeleteAsync(Worklog worklog)
@@ -112,24 +101,15 @@ namespace Toggl2Jira.Core.Services
                 worklog.TogglWorklog = null;
             }
         }
-
-        private DateTime TrimToMinutes(DateTime value)
-        {
-            return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMinute, value.Kind);
-        }
-
+        
         private TogglWorklog CreateTogglWorklogToSend(Worklog worklog)
         {
-            var togglWorklogToSend = Clone(worklog.TogglWorklog);
-            _worklogConverter.UpdateTogglWorklog(togglWorklogToSend, worklog);
-            return togglWorklogToSend;
+            return _worklogConverter.ToTogglWorklog(worklog);
         }
 
         private TempoWorklog CreateTempoWorklogToSend(Worklog worklog)
         {
-            var tempoWorklogToSend = Clone(worklog.TempoWorklog);
-            _worklogConverter.UpdateTempoWorklog(tempoWorklogToSend, worklog);
-            return tempoWorklogToSend;
+            return _worklogConverter.ToTempoWorklog(worklog);
         }
 
         private async Task RollbackSynchronizationAsync(Worklog worklog, TogglWorklog sentTogglWorklog, TempoWorklog sentTempoWorklog)

@@ -102,7 +102,7 @@ namespace Toggl2Jira.Core.Tests
             var newDuration = TimeSpan.FromHours(3);
             worklog.Duration = newDuration;
             
-            _converter.UpdateTogglWorklog(togglWorklog, worklog);
+            togglWorklog = _converter.ToTogglWorklog(worklog);
             
             Assert.AreEqual("MAG-124 desing/analysis. analysis of new features", togglWorklog.description);
             Assert.AreEqual(newStartDate, togglWorklog.start);

@@ -31,5 +31,11 @@
     <Style TargetType="ComboBox" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="xctk:DateTimePicker" BasedOn="{StaticResource CommonValidationStyle}" />
     <Style TargetType="xctk:TimeSpanUpDown" BasedOn="{StaticResource CommonValidationStyle}" />
-    <Style TargetType="views:Autocomplete" BasedOn="{StaticResource CommonValidationStyle}" />        
+    <Style TargetType="views:Autocomplete" BasedOn="{StaticResource CommonValidationStyle}" />
+
+    <Style TargetType="TextBlock" x:Key="HeaderTextBlock">
+        <Setter Property="FontSize" Value="18"></Setter>
+        <Setter Property="FontWeight" Value="Bold"></Setter>
+    </Style>
+    
 </ResourceDictionary>

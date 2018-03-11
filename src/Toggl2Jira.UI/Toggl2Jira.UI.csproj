@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>appIcon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac, Version=4.6.2.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
       <HintPath>..\..\packages\Autofac.4.6.2\lib\net45\Autofac.dll</HintPath>
@@ -139,9 +142,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Utils\BooleanToVisibilityConverter.cs" />
     <Compile Include="Utils\ConditionExtensions.cs" />
+    <Compile Include="Utils\DataGridCopyPasteBehavior.cs" />
     <Compile Include="Utils\EnumerableExtensions.cs" />
     <Compile Include="Utils\InvertBooleanConverter.cs" />
+    <Compile Include="Utils\NullableVisibilityConverter.cs" />
+    <Compile Include="Utils\ParallelUtils.cs" />
+    <Compile Include="Utils\SynchronizationStatusToImageConverter.cs" />
     <Compile Include="ViewModels\BusyCounter.cs" />
     <Compile Include="ViewModels\ErrorsContainer.cs" />
     <Compile Include="ViewModels\IssueAutocompleteDataSource.cs" />
@@ -193,6 +201,27 @@
       <Project>{7AC7949E-28B4-4060-AB9C-6348022634EE}</Project>
       <Name>Toggl2Jira.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\appIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\newWorklog.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\modifyWorklog.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\deleteWorklog.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\upToDateWorklog.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="appIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\synchronizationError.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

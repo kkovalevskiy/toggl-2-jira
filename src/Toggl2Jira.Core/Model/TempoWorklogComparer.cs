@@ -29,7 +29,7 @@ namespace Toggl2Jira.Core.Model
             protected override bool EqualsImpl(worklogAttribute x, worklogAttribute y)
             {
                 return x.key == y.key
-                    && y.value == y.value;
+                    && x.value == y.value;
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnsureThat;
+using System;
 using System.Text;
 
 namespace Toggl2Jira.Core
@@ -15,6 +16,20 @@ namespace Toggl2Jira.Core
         {
             byte[] data = Convert.FromBase64String(encodedText);
             return Encoding.UTF8.GetString(data);         
+        }        
+    }
+
+    public static class CustomExtensions
+    {
+        public static StringBuilder AppendLineIfNotEmpty(this StringBuilder stringBuilder, string line)
+        {
+            EnsureArg.IsNotNull(stringBuilder);
+            if(stringBuilder.Length != 0)
+            {
+                stringBuilder.AppendLine(line);
+            }
+
+            return stringBuilder;
         }
     }
 }
