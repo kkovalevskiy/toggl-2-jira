@@ -40,8 +40,8 @@
     <Reference Include="Autofac, Version=4.6.2.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
       <HintPath>..\..\packages\Autofac.4.6.2\lib\net45\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Ensure.That, Version=7.2.1.70, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Users\s0501_000\.nuget\packages\ensure.that\7.2.1\lib\net451\Ensure.That.dll</HintPath>
+    <Reference Include="Ensure.That, Version=7.2.1.70, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Ensure.That.7.2.1\lib\net451\Ensure.That.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
       <HintPath>..\..\packages\Microsoft.Extensions.Configuration.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll</HintPath>
