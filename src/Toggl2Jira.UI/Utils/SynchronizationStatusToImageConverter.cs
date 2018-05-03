@@ -14,7 +14,7 @@ namespace Toggl2Jira.UI.Utils
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var status = value as WorklogSynchronizationStatus?;
-            if(status == null)
+            if (status == null)
             {
                 return null;
             }

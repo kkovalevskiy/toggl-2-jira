@@ -12,7 +12,8 @@ namespace Toggl2Jira.Core
         public Dictionary<string, string> IssueKeyAliases { get; set; } = new Dictionary<string, string>
         {
             {"MET", "MAG-1"},
-            {"OTH", "POL-12114"}
+            {"OTH", "POL-12114"},
+            {"HLP", "MAG-65" }
         };
 
         public Dictionary<string, string> IssueKeyToDefaultActivityMap { get; set; } = new Dictionary<string, string>();
