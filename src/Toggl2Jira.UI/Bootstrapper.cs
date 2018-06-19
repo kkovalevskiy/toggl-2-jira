@@ -21,6 +21,7 @@ namespace Toggl2Jira.UI
             builder.RegisterInstance(config.JiraConfiguration).AsSelf();
             builder.RegisterInstance(config.TogglConfiguration).AsSelf();
             builder.RegisterInstance(config.WorklogDataConfguration).AsSelf();
+            builder.RegisterInstance(config.TempoConfiguration).AsSelf();
 
             builder
                 .RegisterAssemblyTypes(Assembly.GetAssembly(typeof(TogglWorklogRepository)))

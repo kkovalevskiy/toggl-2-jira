@@ -50,6 +50,12 @@ namespace Toggl2Jira.Core.Services
                 result.Add(nameof(worklog.IssueKey), "Issue Key is empty");
             }
 
+            if (result.IssueSummary?.Contains("**") ?? false)
+            {
+                result.Add(nameof(worklog.IssueKey), "Issue key seems to be **WRONG TASK**, please use alternative issue");
+            }
+            
+
             if (string.IsNullOrWhiteSpace(worklog.Comment))
             {
                 result.Add(nameof(worklog.Comment), "Comment can not be empty");
@@ -83,7 +89,7 @@ namespace Toggl2Jira.Core.Services
             if (worklog.StartDate > DateTime.Now)
             {
                 result.Add(nameof(worklog.StartDate), "StartDate is in future");
-            }
+            }            
 
             return result;
         }

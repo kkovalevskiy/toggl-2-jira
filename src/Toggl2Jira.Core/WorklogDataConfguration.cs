@@ -7,16 +7,26 @@ namespace Toggl2Jira.Core
         public string TogglWorklogCommentFormatString = @"{IssueKey} {Activity}{ActivitySeparator}{Comment}";
         public string ActivitySeparator = ". ";
 
-        public string WorklogRegex = @"(?<IssueKey>[A-Z]+\-[0-9]+)?(?<IssueKeyAlias>[A-Z]{3})?\s*(?<Comment>.*)";
+        public string WorklogRegex = @"(?<IssueKey>[A-Z]+\-[0-9]+)?(?<IssueKeyAlias>[A-Z]{2,})?\s*(?<Comment>.*)";
 
         public Dictionary<string, string> IssueKeyAliases { get; set; } = new Dictionary<string, string>
         {
-            {"MET", "MAG-1"},
-            {"OTH", "POL-12114"},
-            {"HLP", "MAG-65" }
+            {"MET",     "MAG-1"},
+            {"CMET",    "IN-59"},
+            {"PMET",    "POLPS-3"},
+            {"OTH",     "POLPS-13"},
+            {"CR",      "POLPS-14"},
+            {"AN",      "MAG-934"},
+            {"PLN",     "MAG-935"},
+            {"HLP",     "MAG-1" },
+            {"WIKI",    "POLPS-9" },
         };
 
-        public Dictionary<string, string> IssueKeyToDefaultActivityMap { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> IssueKeyToDefaultActivityMap { get; set; } = new Dictionary<string, string>
+        {
+            {"POLPS-14", "Code Review" },
+            {"MAG-934", "Design/Analysis" },
+        };
 
         public List<string> Activities { get; set; } = new List<string>
         {
