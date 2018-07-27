@@ -91,8 +91,8 @@ namespace Toggl2Jira.Core.Model
             }
             activity = activity.ToLower();
             
-            var comment = source.Comment;
-            if (comment.StartsWith(activity) && string.IsNullOrWhiteSpace(activity) == false)
+            var comment = source.Comment ?? "";
+            if (comment.StartsWith(activity)  && string.IsNullOrWhiteSpace(activity) == false)
             {
                 activity = "";                
             }
@@ -147,7 +147,7 @@ namespace Toggl2Jira.Core.Model
 
             var possibleValues = _configuration.Activities.Union(_configuration.ActivityAliases.Keys).ToArray();
             return possibleValues.FirstOrDefault(v =>
-                parsedComment.StartsWith(v, StringComparison.InvariantCultureIgnoreCase));
+                parsedComment?.StartsWith(v, StringComparison.InvariantCultureIgnoreCase) ?? false);
         }
 
         private bool TryExtractMappedValue<TValue, TMappedValue>(TValue value,
@@ -161,7 +161,7 @@ namespace Toggl2Jira.Core.Model
 
         private string ExtractDataByRegex(string targetString, string regex, string groupName)
         {
-            if (string.IsNullOrWhiteSpace(regex)) return null;
+            if (string.IsNullOrWhiteSpace(regex) || string.IsNullOrWhiteSpace(targetString)) return null;
 
             var match = Regex.Match(targetString, regex);
             if (match.Success == false) return null;

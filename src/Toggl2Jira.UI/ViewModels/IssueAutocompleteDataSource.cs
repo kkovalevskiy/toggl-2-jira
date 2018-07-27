@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnsureThat;
+using Toggl2Jira.Core;
 using Toggl2Jira.Core.Model;
 using Toggl2Jira.Core.Repositories;
 using Toggl2Jira.UI.Views;
@@ -14,13 +15,17 @@ namespace Toggl2Jira.UI.ViewModels
     public class IssueAutocompleteDataSource: IAutocompleteDataSource
     {
         private readonly IJiraIssuesRepository _jiraIssuesRepository;
-        private const string ProjectRegex = @"(\b[A-Z]{3,}\b)";
+        private WorklogDataConfguration _worklogDataConfguration;
+        private const string ProjectRegex = @"(\b[A-Z]{2,}\b)";
         private const string IssueKeyRegex = @"^[A-Z]{2,}\-\d+$";
 
 
-        public IssueAutocompleteDataSource(IJiraIssuesRepository jiraIssuesRepository)
+        public IssueAutocompleteDataSource(IJiraIssuesRepository jiraIssuesRepository, WorklogDataConfguration dataConfguration)
         {
-            EnsureArg.IsNotNull(jiraIssuesRepository);            
+            EnsureArg.IsNotNull(jiraIssuesRepository);
+            EnsureArg.IsNotNull(dataConfguration);
+
+            _worklogDataConfguration = dataConfguration;                        
             _jiraIssuesRepository = jiraIssuesRepository;
         }
 
@@ -39,6 +44,11 @@ namespace Toggl2Jira.UI.ViewModels
 
         private string GetJQL(string searchString)
         {
+            if (_worklogDataConfguration.IssueKeyAliases.ContainsKey(searchString))
+            {
+                searchString = _worklogDataConfguration.IssueKeyAliases[searchString];
+            }
+
             if (Regex.IsMatch(searchString, IssueKeyRegex))
             {
                 // search by key
@@ -64,7 +74,7 @@ namespace Toggl2Jira.UI.ViewModels
 
             return 
                 $"summary ~ \"{searchString}\" and project not in (PROC, APPONE) " +
-                (targetProjects.Count != 0 ? $"and project in ({string.Join(", ", targetProjects)}) " : "") +
+                (targetProjects.Count != 0 ? $"and project in ({string.Join(", ", targetProjects.Select(p => $"\"{p}\""))}) " : "") +
                 $"order by project asc, created desc";
         }
     }

@@ -120,6 +120,7 @@ namespace Toggl2Jira.UI.Views
 
 
             var textSuggestions = textChanged
+                .ObserveOnDispatcher()
                 .Where(e => e.EventArgs.Key.In(Key.Escape, Key.Down, Key.Up, Key.Enter) == false)
                 .Select(t => _textBox.Text)
                 .DistinctUntilChanged() 

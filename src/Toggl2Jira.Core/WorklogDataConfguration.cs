@@ -20,6 +20,7 @@ namespace Toggl2Jira.Core
             {"PLN",     "MAG-935"},
             {"HLP",     "MAG-1" },
             {"WIKI",    "POLPS-9" },
+            {"TPR",     "POLPS-13" },
         };
 
         public Dictionary<string, string> IssueKeyToDefaultActivityMap { get; set; } = new Dictionary<string, string>

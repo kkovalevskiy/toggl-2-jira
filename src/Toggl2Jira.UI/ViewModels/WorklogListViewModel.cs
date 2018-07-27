@@ -47,7 +47,7 @@ namespace Toggl2Jira.UI.ViewModels
             _worklogSynchronizationService = worklogSynchronizationService;
             _synchronizationStatusBuilder = synchronizationStatusBuilder;
             _activityList = new ObservableCollection<string>(worklogDataConfguration.Activities);
-            _issueAutocompleteDataSource = new IssueAutocompleteDataSource(jiraIssuesRepository);
+            _issueAutocompleteDataSource = new IssueAutocompleteDataSource(jiraIssuesRepository, worklogDataConfguration);
 
             _toDate = DateTime.Now;
             _fromDate = _toDate.AddDays(-1);
@@ -62,6 +62,7 @@ namespace Toggl2Jira.UI.ViewModels
             {
                 ValidateWorklogsCommand.RaiseCanExecuteChanged();
                 SynchronizeWorklogsCommand.RaiseCanExecuteChanged();
+                RaisePropertyChanged(nameof(TotalDuration));
             };
 
             LoadWorklogsCommand = new DelegateCommand(InvokeLoadWorklogs, () => CanLoadWorklogs);
@@ -108,6 +109,7 @@ namespace Toggl2Jira.UI.ViewModels
         private bool CanSynchronizeWorklogs => BusyCounter.IsBusy == false && Worklogs.Count != 0 &&
                                                Worklogs.All(w => w.HasErrors == false);
 
+        
         private bool CanDeleteNotMatchedWorklogs => Worklogs.Any(w => w.Worklog.IsNotMatched);
 
         public DelegateCommand LoadWorklogsCommand { get; }
@@ -119,6 +121,8 @@ namespace Toggl2Jira.UI.ViewModels
         public ObservableCollection<WorklogViewModel> Worklogs { get; } = new ObservableCollection<WorklogViewModel>();
 
         public BusyCounter BusyCounter { get; } = new BusyCounter();
+
+        public double TotalDuration => Worklogs.Aggregate(TimeSpan.Zero, (d, w) => d.Add(w.Duration)).TotalHours;
 
         protected override void OnErrorsChanged(string propertyName)
         {
@@ -152,7 +156,7 @@ namespace Toggl2Jira.UI.ViewModels
                     worklogViewModel.ErrorsChanged -= OnChildViewModelErrorsChanged;
                 }
                 Worklogs.Clear();
-                Worklogs.AddRange(worklogsViewModels);
+                Worklogs.AddRange(worklogsViewModels);                
             }
 
             InvokeValidateWorklogs();

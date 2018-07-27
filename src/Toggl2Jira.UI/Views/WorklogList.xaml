@@ -51,7 +51,11 @@
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <TextBlock Style="{StaticResource HeaderTextBlock}" Text="Worklogs"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource HeaderTextBlock}" Text="Worklogs, "></TextBlock>
+                    <TextBlock Style="{StaticResource HeaderTextBlock}" Text="{Binding TotalDuration, StringFormat=F2}"></TextBlock>
+                    <TextBlock Style="{StaticResource HeaderTextBlock}" Text=" hours"></TextBlock>
+                </StackPanel>
 
                 <DataGrid 
                     ItemsSource="{Binding Worklogs}" 
