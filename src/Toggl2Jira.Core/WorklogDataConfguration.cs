@@ -21,6 +21,10 @@ namespace Toggl2Jira.Core
             {"HLP",     "MAG-1" },
             {"WIKI",    "POLPS-9" },
             {"TPR",     "POLPS-13" },
+            {"NGT",     "MAG-211" },
+            {"NPM",     "NEXT-16" },
+            {"NMET",    "NEXT-8" },
+            {"NAN",     "NEXT-7" },
         };
 
         public Dictionary<string, string> IssueKeyToDefaultActivityMap { get; set; } = new Dictionary<string, string>
