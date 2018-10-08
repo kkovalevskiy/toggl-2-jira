@@ -1,0 +1,51 @@
+﻿{
+  "jira": {
+    "userName": "<jiraUserName>",
+    "password": "<jiraPassword>"
+  },
+  "toggl": {
+    "apiToken": "<togglApiToken>"
+  },
+  "tempo": {
+    "userName": "<tempoUserName>",
+    "apiToken": "<tempoApiToken>"
+  },
+  "parsingSettings": {
+    "togglWorklogCommentFormatString": "{IssueKey} {Activity}{ActivitySeparator}{Comment}",
+    "activitySeparator": ". ",
+    "worklogRegex": "(?<IssueKey>[A-Z]+\\-[0-9]+)?(?<IssueKeyAlias>[A-Z]{2,})?\\s*(?<Comment>.*)",
+    "issueKeyAliases": {
+      "MET": "MAG-1",
+      "CMET": "IN-59",
+      "PMET": "POLPS-3",
+      "OTH": "POLPS-13",
+      "CR": "POLPS-14",
+      "AN": "MAG-934",
+      "PLN": "MAG-935",
+      "HLP": "NMET",
+      "WIKI": "POLPS-9",
+      "TPR": "POLPS-13",
+      "NGT": "MAG-211",
+      "NPM": "NEXT-16",
+      "NMET": "NEXT-8",
+      "NAN": "NEXT-7"
+    },
+    "issueKeyToDefaultActivityMap": {
+      "POLPS-14": "Code Review",
+      "MAG-934": "Design/Analysis"
+    },
+    "activities": [
+      "Code Review",
+      "Other",
+      "Design/Analysis",
+      "Development",
+      "Code Review Fixes",
+      "Bugfixing"
+    ],
+    "activityAliases": {
+      "cr fix": "Code Review Fixes",
+      "analysis": "Design/Analysis"
+    },
+    "defaultActivity": "Other"
+  }
+}

@@ -14,18 +14,22 @@ namespace Toggl2Jira.Core
             var tempoApiToken = configFile["tempo:apiToken"];
             var tempoUserName = configFile["tempo:userName"];
 
-            return new Configuration(new JiraConfiguration(userName, password), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName));
+            var worklogDataConfig = new WorklogDataConfguration();
+            configFile.Bind("parsingSettings", worklogDataConfig);
+            return new Configuration(new JiraConfiguration(userName, password), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName), worklogDataConfig);
         }
 
-        private Configuration(JiraConfiguration jiraConfiguration, TogglConfiguration togglConfiguration, TempoConfiguration tempoConfiguration)
+        private Configuration(JiraConfiguration jiraConfiguration, TogglConfiguration togglConfiguration, TempoConfiguration tempoConfiguration, WorklogDataConfguration worklogDataConfguration)
         {
             EnsureArg.IsNotNull(jiraConfiguration, nameof(jiraConfiguration));
             EnsureArg.IsNotNull(togglConfiguration, nameof(togglConfiguration));
-            EnsureArg.IsNotNull(togglConfiguration, nameof(tempoConfiguration));
+            EnsureArg.IsNotNull(tempoConfiguration, nameof(tempoConfiguration));
+            EnsureArg.IsNotNull(worklogDataConfguration, nameof(worklogDataConfguration));
 
             JiraConfiguration = jiraConfiguration;
             TogglConfiguration = togglConfiguration;
             TempoConfiguration = tempoConfiguration;
+            WorklogDataConfguration = worklogDataConfguration;
         }
 
         public JiraConfiguration JiraConfiguration { get; }
@@ -33,9 +37,7 @@ namespace Toggl2Jira.Core
         public TogglConfiguration TogglConfiguration { get; }
 
         public TempoConfiguration TempoConfiguration { get; }
-        
-        // Use default configuration
-        // TDB read it from json
-        public WorklogDataConfguration WorklogDataConfguration { get; } = new WorklogDataConfguration();
+                
+        public WorklogDataConfguration WorklogDataConfguration { get; } 
     }
 }
