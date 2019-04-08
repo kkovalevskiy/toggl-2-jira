@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,7 +15,7 @@ namespace Toggl2Jira.Core.Repositories
     public class TempoRepository : ITempoWorklogRepository
     {
         private readonly TempoConfiguration _tempoConfiguration;
-        public const string WorklogUrl = "https://api.tempo.io/rest-legacy/tempo-timesheets/3/worklogs";
+        public const string WorklogUrl = "https://api.tempo.io/core/3/worklogs";
 
 
         public TempoRepository(TempoConfiguration tempoConfiguration)
@@ -27,9 +28,9 @@ namespace Toggl2Jira.Core.Repositories
         {
             using (var client = new HttpClient())
             {
-                foreach (var worklog in worklogs.Where(w => w.id.HasValue))
+                foreach (var worklog in worklogs.Where(w => w.tempoWorklogId.HasValue))
                 {
-                    var request = CreateRequestMessage(HttpMethod.Delete, WorklogUrl + $"/{worklog.id}");
+                    var request = CreateRequestMessage(HttpMethod.Delete, WorklogUrl + $"/{worklog.tempoWorklogId}");
                     var response = await client.SendAsync(request);
                     response.EnsureSuccessStatus();
                 }
@@ -38,14 +39,14 @@ namespace Toggl2Jira.Core.Repositories
 
         public async Task<IEnumerable<TempoWorklog>> GetWorklogsAsync(DateTime? from = null, DateTime? to = null)
         {
-            var uri = new QueryUri(WorklogUrl);
+            var uri = new QueryUri(WorklogUrl + $"/user/{GetUserAccountId()}");
             if (from.HasValue && to.HasValue == false)
             {
                 to = DateTime.Now;
             }
-            uri.AddDateTimeFilter("dateFrom", from, "yyyy-MM-dd");
-            uri.AddDateTimeFilter("dateTo", to, "yyyy-MM-dd");
-            uri.AddStringFilter("username", GetUserName());
+            uri.AddDateTimeFilter("from", from, "yyyy-MM-dd");
+            uri.AddDateTimeFilter("to", to, "yyyy-MM-dd");
+            uri.AddIntFilter("limit", 1000);
 
             var httpRequest = CreateRequestMessage(HttpMethod.Get, uri.ToString());
             using (var client = new HttpClient())
@@ -53,7 +54,8 @@ namespace Toggl2Jira.Core.Repositories
                 var response = await client.SendAsync(httpRequest);
                 response.EnsureSuccessStatus();
                 var stringResult = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<TempoWorklog[]>(stringResult, ApiUtils.GetSerializerSettings());
+                var result = JsonConvert.DeserializeObject<TempoWorklogSearchResult>(stringResult, ApiUtils.GetSerializerSettings());
+                return result.results;
             }
         }
 
@@ -63,9 +65,12 @@ namespace Toggl2Jira.Core.Repositories
             {
                 foreach (var worklog in worklogs)
                 {
-                    worklog.author = new author { name = GetUserName() };
+                    worklog.author = new author { accountId = GetUserAccountId(), displayName = GetUserName() };
                     var request = CreateWorklogSavingMessage(worklog);
-                    var content = JsonConvert.SerializeObject(worklog, ApiUtils.GetSerializerSettings());
+                    var saveModel = worklog.ToSaveModel();
+                    var serializerSettings = ApiUtils.GetSerializerSettings();
+                    serializerSettings.DateFormatString = "yyyy-MM-dd";                    
+                    var content = JsonConvert.SerializeObject(saveModel, serializerSettings);
                     request.Content = new StringContent(content, Encoding.UTF8, "application/json");
 
                     var response = await client.SendAsync(request);
@@ -73,7 +78,7 @@ namespace Toggl2Jira.Core.Repositories
 
                     var resultContent = await response.Content.ReadAsStringAsync();
                     var resultWorklog = JsonConvert.DeserializeObject<TempoWorklog>(resultContent, ApiUtils.GetSerializerSettings());
-                    worklog.id = resultWorklog.id;
+                    worklog.tempoWorklogId = resultWorklog.tempoWorklogId;
                 }
             }
         }
@@ -86,9 +91,9 @@ namespace Toggl2Jira.Core.Repositories
         }
         private HttpRequestMessage CreateWorklogSavingMessage(TempoWorklog worklog)
         {
-            if (worklog.id.HasValue)
+            if (worklog.tempoWorklogId.HasValue)
             {
-                return CreateRequestMessage(HttpMethod.Put, WorklogUrl + $"/{worklog.id}");
+                return CreateRequestMessage(HttpMethod.Put, WorklogUrl + $"/{worklog.tempoWorklogId}");
             }
 
             return CreateRequestMessage(HttpMethod.Post, WorklogUrl);
@@ -97,6 +102,11 @@ namespace Toggl2Jira.Core.Repositories
         private string GetUserName()
         {
             return _tempoConfiguration.UserName;
+        }
+
+        private string GetUserAccountId()
+        {
+            return _tempoConfiguration.UserAccountId;
         }
     }
 }

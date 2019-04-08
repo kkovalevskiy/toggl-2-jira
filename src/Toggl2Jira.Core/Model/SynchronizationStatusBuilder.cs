@@ -49,7 +49,7 @@ namespace Toggl2Jira.Core.Model
             }
 
             var tempoWorklog = _worklogConverter.ToTempoWorklog(worklog);
-            if (tempoWorklog.id.HasValue == false)
+            if (tempoWorklog.tempoWorklogId.HasValue == false)
             {
                 return WorklogSynchronizationStatus.New;
             }

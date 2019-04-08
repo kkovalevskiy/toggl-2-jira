@@ -13,10 +13,11 @@ namespace Toggl2Jira.Core
             var togglApiToken = configFile["toggl:apiToken"];
             var tempoApiToken = configFile["tempo:apiToken"];
             var tempoUserName = configFile["tempo:userName"];
+            var tempoUserAccountId = configFile["tempo:userAccountId"];
 
             var worklogDataConfig = new WorklogDataConfguration();
             configFile.Bind("parsingSettings", worklogDataConfig);
-            return new Configuration(new JiraConfiguration(userName, password), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName), worklogDataConfig);
+            return new Configuration(new JiraConfiguration(userName, password), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName, tempoUserAccountId), worklogDataConfig);
         }
 
         private Configuration(JiraConfiguration jiraConfiguration, TogglConfiguration togglConfiguration, TempoConfiguration tempoConfiguration, WorklogDataConfguration worklogDataConfguration)

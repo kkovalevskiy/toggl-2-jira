@@ -47,7 +47,8 @@ namespace Toggl2Jira.Core.Services
                 
                 return SynchronizationResult.CreateSuccess();
             }
-            catch(Exception syncException) {
+            catch(Exception syncException)
+            {
                 try
                 {
                     await RollbackSynchronizationAsync(worklog, togglWorklogToSend, tempoWorklogToSend);
@@ -73,7 +74,7 @@ namespace Toggl2Jira.Core.Services
             var worklogs = togglWorklogs.Select(w => _worklogConverter.FromTogglWorklog(w)).ToList();
             foreach (var tempoWorklog in tempoWorklogs)
             {
-                var matchedWorklog = worklogs.FirstOrDefault(w => w.StartDate == tempoWorklog.dateStarted);
+                var matchedWorklog = worklogs.FirstOrDefault(w => w.StartDate == tempoWorklog.startDate.Add(tempoWorklog.startTime));
                 if (matchedWorklog == null)
                 {                    
                     worklogs.Add(_worklogConverter.FromTempoWorklog(tempoWorklog));
@@ -124,7 +125,7 @@ namespace Toggl2Jira.Core.Services
                 worklog.TogglWorklog = null;
             }
 
-            if (worklog.TempoWorklog?.id != null)
+            if (worklog.TempoWorklog?.tempoWorklogId != null)
             {   
                 await _tempoWorklogRepository.SaveWorklogsAsync(new[] {worklog.TempoWorklog});
             }

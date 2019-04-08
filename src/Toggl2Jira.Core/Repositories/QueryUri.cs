@@ -35,6 +35,13 @@ namespace Toggl2Jira.Core.Repositories
             return this;
         }
 
+        public QueryUri AddIntFilter(string filterName, int value)
+        {
+            AddFilterSeparator();
+            _query += $"{filterName}={value}";
+            return this;
+        }
+
         public override string ToString()
         {
             var uriBuilder = new UriBuilder(_baseUri) {Query = _query};

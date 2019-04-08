@@ -6,27 +6,28 @@ namespace Toggl2Jira.Core.Model
     {
         public static TempoWorklogComparer Instance { get; } = new TempoWorklogComparer();
 
-        private readonly IEqualityComparer<worklogAttribute[]> _attributeComparer;
+        private readonly IEqualityComparer<worklogAttributeValue[]> _attributeComparer;
 
         public TempoWorklogComparer()
         {
-            _attributeComparer = UnorderedCollectionComparer<worklogAttribute>.WithKey(a => a.key, new worklogAttributeComparer());
+            _attributeComparer = UnorderedCollectionComparer<worklogAttributeValue>.WithKey(a => a.key, new worklogAttributeComparer());
         }
 
         protected override bool EqualsImpl(TempoWorklog x, TempoWorklog y)
         {
-            return x.author?.name == y.author?.name
-                && x.comment == y.comment
-                && x.dateStarted == y.dateStarted
-                && x.id == y.id
+            return x.author?.displayName == y.author?.displayName
+                && x.description == y.description
+                && x.startDate == y.startDate
+                && x.startTime == y.startTime
+                && x.tempoWorklogId == y.tempoWorklogId
                 && x.issue?.key == y.issue?.key
                 && x.timeSpentSeconds == y.timeSpentSeconds
-                && _attributeComparer.Equals(x.worklogAttributes, y.worklogAttributes);                
+                && _attributeComparer.Equals(x?.attributes?.values, y?.attributes?.values);                
         }
 
-        private class worklogAttributeComparer : NullableEqualityComparer<worklogAttribute>
+        private class worklogAttributeComparer : NullableEqualityComparer<worklogAttributeValue>
         {
-            protected override bool EqualsImpl(worklogAttribute x, worklogAttribute y)
+            protected override bool EqualsImpl(worklogAttributeValue x, worklogAttributeValue y)
             {
                 return x.key == y.key
                     && x.value == y.value;

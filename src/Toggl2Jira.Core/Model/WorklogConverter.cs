@@ -31,11 +31,11 @@ namespace Toggl2Jira.Core.Model
         {
             return new Worklog()
             {
-                Activity = originalWorklog?.worklogAttributes.FirstOrDefault(a => a.key == "_Activity_")?.value?.Replace("%20", " ")?.Replace("%2F", "/"),
-                Comment = originalWorklog.comment,
+                Activity = originalWorklog?.attributes?.values.FirstOrDefault(a => a.key == "_Activity_")?.value?.Replace("%20", " ")?.Replace("%2F", "/"),
+                Comment = originalWorklog.description,
                 Duration = TimeSpan.FromSeconds(originalWorklog.timeSpentSeconds),
                 IssueKey = originalWorklog.issue?.key,
-                StartDate = originalWorklog.dateStarted,
+                StartDate = originalWorklog.startDate.Add(originalWorklog.startTime),
                 TempoWorklog = originalWorklog
             };
         }
@@ -47,9 +47,17 @@ namespace Toggl2Jira.Core.Model
             {
                 var issueKeyAlias = ExtractDataByRegex(originalWorklog.description, _configuration.WorklogRegex,
                     "IssueKeyAlias");
-                if (TryExtractMappedValue(issueKeyAlias, _configuration.IssueKeyAliases, out var mappedIssueKey))
-                {
-                    issueKey = mappedIssueKey;
+                while (true)
+                {                    
+                    if (TryExtractMappedValue(issueKeyAlias, _configuration.IssueKeyAliases, out var mappedIssueKey))
+                    {
+                        issueKey = mappedIssueKey;
+                        issueKeyAlias = mappedIssueKey;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
                                                            
@@ -114,16 +122,20 @@ namespace Toggl2Jira.Core.Model
         public TempoWorklog ToTempoWorklog(Worklog source)
         {
             var result = CreateOrClone(source.TempoWorklog);
-            result.comment = source.Comment;
-            result.dateStarted = source.StartDate;
+            result.description = source.Comment;
+            result.startDate = source.StartDate.Date;
+            result.startTime = source.StartDate.TimeOfDay;
             result.timeSpentSeconds = (int) source.Duration.TotalSeconds;
             result.issue = new issue {key = source.IssueKey};
-            result.worklogAttributes = new worklogAttribute[1]
+            result.attributes = new attributes()
             {
-                new worklogAttribute
+                values = new worklogAttributeValue[1]
                 {
-                    value = source.Activity.Replace(" ", "%20").Replace("/", "%2F"),
-                    key = "_Activity_"
+                    new worklogAttributeValue
+                    {
+                        value = source.Activity.Replace(" ", "%20").Replace("/", "%2F"),
+                        key = "_Activity_"
+                    }
                 }
             };
             return result;

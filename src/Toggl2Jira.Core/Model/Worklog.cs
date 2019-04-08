@@ -20,6 +20,6 @@ namespace Toggl2Jira.Core.Model
 
         public TogglWorklog TogglWorklog { get; set; }
 
-        public bool IsNotMatched => TempoWorklog?.id != null && TogglWorklog?.id == null;
+        public bool IsNotMatched => TempoWorklog?.tempoWorklogId != null && TogglWorklog?.id == null;
     }
 }
