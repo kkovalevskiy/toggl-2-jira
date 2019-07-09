@@ -4,16 +4,16 @@ namespace Toggl2Jira.Core
 {
     public class JiraConfiguration
     {
-        public JiraConfiguration(string userName, string password)
+        public JiraConfiguration(string userName, string apiToken)
         {
             EnsureArg.IsNotNullOrWhiteSpace(userName, nameof(userName));
-            EnsureArg.IsNotNullOrWhiteSpace(password, nameof(password));
+            EnsureArg.IsNotNullOrWhiteSpace(apiToken, nameof(apiToken));
             UserName = userName;
-            Password = password;
+            ApiToken = apiToken;
         }
 
         public string UserName { get; set; }
 
-        public string Password { get; set; }
+        public string ApiToken { get; set; }
     }
 }

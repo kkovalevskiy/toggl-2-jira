@@ -76,7 +76,7 @@ namespace Toggl2Jira.Core.Repositories
         {
             var httpRequest = new HttpRequestMessage(method, url);
             var authorizationHeaderValue =
-                Utils.EncodeBase64($"{_configuration.UserName}:{_configuration.Password}");
+                Utils.EncodeBase64($"{_configuration.UserName}:{_configuration.ApiToken}");
             httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Basic", authorizationHeaderValue);
             return httpRequest;
         }

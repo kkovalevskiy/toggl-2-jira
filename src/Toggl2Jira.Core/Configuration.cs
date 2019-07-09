@@ -9,7 +9,7 @@ namespace Toggl2Jira.Core
         public static Configuration FromEnvironmentConfig(IConfiguration configFile)
         {
             var userName = configFile["jira:userName"];
-            var password = configFile["jira:password"];
+            var apiToken = configFile["jira:apiToken"];
             var togglApiToken = configFile["toggl:apiToken"];
             var tempoApiToken = configFile["tempo:apiToken"];
             var tempoUserName = configFile["tempo:userName"];
@@ -17,7 +17,7 @@ namespace Toggl2Jira.Core
 
             var worklogDataConfig = new WorklogDataConfguration();
             configFile.Bind("parsingSettings", worklogDataConfig);
-            return new Configuration(new JiraConfiguration(userName, password), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName, tempoUserAccountId), worklogDataConfig);
+            return new Configuration(new JiraConfiguration(userName, apiToken), new TogglConfiguration(togglApiToken), new TempoConfiguration(tempoApiToken, tempoUserName, tempoUserAccountId), worklogDataConfig);
         }
 
         private Configuration(JiraConfiguration jiraConfiguration, TogglConfiguration togglConfiguration, TempoConfiguration tempoConfiguration, WorklogDataConfguration worklogDataConfguration)
