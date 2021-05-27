@@ -204,10 +204,15 @@ namespace Toggl2Jira.UI.ViewModels
             var syncOperation = BusyCounter.StartBusyOperation((w, t) => $"Synchronizing worklog {w}/{t}", totalCount);
             using (syncOperation)
             {
-                await ParallelUtils.ForEachAsync(worklogsToSynchronize, MaxDegreeOfParallelism, async w =>
+                var groupedByIssuesKeyWorklogs = worklogsToSynchronize.GroupBy(w => w.IssueKey);
+                
+                await ParallelUtils.ForEachAsync(groupedByIssuesKeyWorklogs, MaxDegreeOfParallelism, async w =>
                 {
-                    await SynchronizeWorklog(w);
-                    syncOperation.IncrementProgress(1);
+                    foreach (var worklog in w)
+                    {
+                        await SynchronizeWorklog(worklog);
+                        syncOperation.IncrementProgress(1);    
+                    }
                 });
             }
         }

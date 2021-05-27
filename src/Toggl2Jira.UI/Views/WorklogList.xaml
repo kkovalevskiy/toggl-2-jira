@@ -6,8 +6,8 @@
              xmlns:local="clr-namespace:Toggl2Jira.UI.Views"
              xmlns:vm="clr-namespace:Toggl2Jira.UI.ViewModels"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:utils="clr-namespace:Toggl2Jira.UI.Utils"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance d:Type = vm:WorklogListViewModel, IsDesignTimeCreatable = False}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -66,9 +66,9 @@
                     Grid.Row="1"
                     SelectedItem="{Binding SelectedWorklog, Mode=TwoWay}"                    
                     SelectionMode="Single">
-                    <i:Interaction.Behaviors>
+                    <b:Interaction.Behaviors>
                         <utils:DataGridCopyPasteBehavior></utils:DataGridCopyPasteBehavior>
-                    </i:Interaction.Behaviors>
+                    </b:Interaction.Behaviors>
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="IssueKey" SortMemberPath="IssueKey" ClipboardContentBinding="{Binding IssueKey}">
                             <DataGridTemplateColumn.CellTemplate>
