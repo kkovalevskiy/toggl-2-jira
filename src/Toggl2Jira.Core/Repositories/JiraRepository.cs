@@ -44,7 +44,7 @@ namespace Toggl2Jira.Core.Repositories
 
         public async Task<JiraIssue[]> GetJiraIssuesByKeysAsync(string[] keys)
         {
-            var issues = await GetJiraIssuesAsync($"key in ({string.Join(", ", keys.Select(k => $"\"{k}\""))})");
+            var issues = await GetJiraIssuesAsync($"key in ({string.Join(", ", keys.Distinct().Select(k => $"\"{k}\""))})");
             return issues;
         }
 
