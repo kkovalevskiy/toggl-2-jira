@@ -9,7 +9,7 @@ namespace Toggl2Jira.Core.Model
         public string description;
         public double duration;
         public Guid? guid;
-        public int? id;
+        public long? id;
         public DateTime start;
         public DateTime stop;
         public string created_with;
