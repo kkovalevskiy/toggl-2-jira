@@ -14,7 +14,7 @@ namespace Toggl2Jira.Core.Repositories
     public class TogglWorklogRepository : ITogglWorklogRepository
     {
         private readonly TogglConfiguration _configuration;
-        private const string TogglTimeEntryUrl = "https://www.toggl.com/api/v8/time_entries";
+        private const string TogglTimeEntryUrl = "https://api.track.toggl.com/api/v8/time_entries";
 
         public TogglWorklogRepository(TogglConfiguration configuration)
         {
